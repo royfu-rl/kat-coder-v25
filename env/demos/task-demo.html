@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Benchmark task demo</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#fff; --ink:#111418; --ink-soft:#5b636e; --ink-dim:#9aa1ab;
+    --line:#e4e7ec; --band:#f0f2f5; --brand:#2f6bff;
+    --pass:#1f9254; --fail:#d0342c; --warn:#b7791f;
+    --mono:"SF Mono",ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);font-family:var(--sans);color:var(--ink);line-height:1.6;
+       -webkit-font-smoothing:antialiased;font-size:13.5px;padding:2px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;
+        box-shadow:0 1px 2px rgba(0,0,0,.03),0 6px 20px rgba(0,0,0,.04)}
+
+  /* ---- head ---- */
+  .head{padding:14px 18px 0}
+  .chips{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .chip{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+        font-weight:600;color:var(--ink-soft);border:1px solid var(--line);background:#fafbfc;
+        border-radius:999px;padding:2px 9px}
+  .chip.lang{color:#fff;border-color:transparent}
+  .chip.bench{color:var(--brand);border-color:#cfdcff;background:#f2f6ff}
+  h1{font-size:16.5px;font-weight:700;letter-spacing:-.01em;margin:9px 0 0;line-height:1.35}
+  .meta{display:flex;flex-wrap:wrap;gap:4px 16px;margin:7px 0 0;font-size:11.5px;color:var(--ink-dim)}
+  .meta .mono{font-family:var(--mono);color:var(--ink-soft)}
+
+  /* ---- subtabs ---- */
+  .subtabs{display:flex;gap:18px;padding:0 18px;margin-top:12px;border-bottom:1px solid var(--line);
+           overflow-x:auto;scrollbar-width:none}
+  .subtabs::-webkit-scrollbar{display:none}
+  .subtab{appearance:none;border:0;background:none;font-family:inherit;cursor:pointer;
+          padding:9px 0;font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;
+          color:var(--ink-dim);border-bottom:2px solid transparent;white-space:nowrap;transition:.15s}
+  .subtab:hover{color:var(--ink-soft)}
+  .subtab.active{color:var(--ink);border-bottom-color:var(--ink)}
+  .subtab .hint{margin-left:6px;font-family:var(--mono);font-size:10.5px;font-weight:500;
+                letter-spacing:0;text-transform:none;color:var(--ink-dim)}
+
+  /* ---- panel ---- */
+  .panel{height:214px;overflow-y:auto;padding:14px 18px;scrollbar-width:thin;
+         scrollbar-color:var(--line) transparent}
+  .panel::-webkit-scrollbar{width:6px}
+  .panel::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
+  .panel p{margin:0 0 9px}
+  .panel p:last-child{margin-bottom:0}
+  .panel ul{margin:0 0 9px;padding-left:19px}
+  .panel li{margin:3px 0}
+  .panel code{font-family:var(--mono);font-size:.87em;background:var(--band);padding:1.5px 5px;border-radius:4px}
+  .panel strong{font-weight:650}
+  /* ---- file block ---- */
+  .fname{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;
+         color:var(--ink-soft);margin:0 0 6px}
+  .fname .dot{width:5px;height:5px;border-radius:50%;background:var(--ink-dim);flex:none}
+  .fname .lines{margin-left:auto;color:var(--ink-dim);font-size:10.5px}
+  pre{margin:0 0 12px;background:#fbfcfd;border:1px solid var(--line);border-radius:8px;
+      padding:10px 12px;overflow-x:auto;font-family:var(--mono);font-size:11.5px;line-height:1.65;
+      white-space:pre;scrollbar-width:thin}
+  pre::-webkit-scrollbar{height:5px}
+  pre::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
+  pre:last-child{margin-bottom:0}
+  .ln{display:block;padding:0 4px;margin:0 -4px;border-radius:2px}
+  .ln.add{background:#e8f6ec;color:#126b36}
+  .ln.del{background:#fdeceb;color:#a32620}
+  .ln.hunk{color:var(--brand);background:#f2f6ff}
+  .ln.cmt{color:var(--ink-dim)}
+
+  /* ---- spec list ---- */
+  dl.specs{display:grid;grid-template-columns:max-content 1fr;gap:5px 18px;margin:0 0 12px;font-size:12.5px}
+  dl.specs dt{color:var(--ink-dim)}
+  dl.specs dd{margin:0}
+  dl.specs dd.mono{font-family:var(--mono);font-size:11.5px;word-break:break-all}
+
+  /* ---- verdict footer ---- */
+  .foot{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 18px;
+        border-top:1px solid var(--line);background:#fafbfc;font-size:11.5px;color:var(--ink-dim)}
+  .badge{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.04em;
+         border:1px solid;border-radius:999px;padding:2px 9px}
+  .badge.pass{color:var(--pass);border-color:#b7dfc6;background:#f0f9f3}
+  .badge.fail{color:var(--fail);border-color:#f2c3bf;background:#fdf2f1}
+  .badge.warn{color:var(--warn);border-color:#ecd9a8;background:#fdf8ec}
+  .badge.plain{color:var(--ink-soft);border-color:var(--line);background:#fff}
+  .foot .note{margin-left:auto;text-align:right}
+  .miss{color:var(--ink-dim);font-size:12.5px}
+</style>
+</head>
+<body>
+<div class="card" id="card"></div>
+<script src="./demo-data.js"></script>
+<script>
+// Render one demo card, selected by the URL hash (#swe-bench, #terminal-bench, …).
+// DEMOS lives in demo-data.js; each entry is {bench, lang, title, repo, commit, id,
+// tabs:[{label,hint,kind,body}], verdict:[{cls,text}], note}.
+const LANG_COLOR = {
+  python:'#3572a5', typescript:'#3178c6', javascript:'#c9a227', rust:'#c56a3a',
+  go:'#00add8', java:'#b07219', 'c/c++':'#5a5a8a', zig:'#c86a2b', shell:'#4b8b3b',
+  multi:'#6b7280', 'ml/python':'#3572a5',
+};
+
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// Colorize a unified diff / shell transcript line-by-line.
+function renderLines(text, mode){
+  return escapeHtml(text).split('\n').map(raw => {
+    let cls = '';
+    if (mode === 'diff'){
+      if (raw.startsWith('@@')) cls = 'hunk';
+      else if (/^(\+\+\+|---)/.test(raw)) cls = 'cmt';
+      else if (raw.startsWith('+')) cls = 'add';
+      else if (raw.startsWith('-')) cls = 'del';
+    } else {                                  // shell transcript
+      if (/^\s*#/.test(raw)) cls = 'cmt';
+      else if (/^\s*\$/.test(raw)) cls = 'add';
+    }
+    return `<span class="ln${cls ? ' ' + cls : ''}">${raw || ' '}</span>`;
+  }).join('');
+}
+
+function renderTab(tab){
+  if (tab.kind === 'html') return tab.body;
+  const label = tab.file
+    ? `<div class="fname"><span class="dot"></span><span>${escapeHtml(tab.file)}</span>` +
+      `<span class="lines">${tab.body.trim().split('\n').length} lines</span></div>`
+    : '';
+  const mode = tab.kind === 'diff' ? 'diff' : tab.kind === 'shell' ? 'shell' : null;
+  const inner = mode ? renderLines(tab.body.trim(), mode) : escapeHtml(tab.body.trim());
+  return label + `<pre>${inner}</pre>`;
+}
+
+function render(demo){
+  const card = document.getElementById('card');
+  if (!demo){
+    card.innerHTML = '<div class="panel"><p class="miss">未找到该 demo。' +
+      'URL 需带 hash，例如 <code>task-demo.html#swe-bench</code>。</p></div>';
+    return;
+  }
+  const langKey = (demo.lang || '').toLowerCase();
+  const color = LANG_COLOR[langKey] || '#6b7280';
+
+  card.innerHTML = `
+    <div class="head">
+      <div class="chips">
+        <span class="chip lang" style="background:${color}">${escapeHtml(demo.lang)}</span>
+        <span class="chip bench">${escapeHtml(demo.bench)}</span>
+      </div>
+      <h1>${escapeHtml(demo.title)}</h1>
+      <div class="meta">
+        ${demo.repo   ? `<span class="mono">${escapeHtml(demo.repo)}</span>` : ''}
+        ${demo.commit ? `<span>base <span class="mono">${escapeHtml(demo.commit)}</span></span>` : ''}
+        ${demo.id     ? `<span class="mono">${escapeHtml(demo.id)}</span>` : ''}
+      </div>
+    </div>
+    <div class="subtabs" id="subtabs"></div>
+    <div class="panel" id="panel"></div>
+    ${demo.verdict || demo.note ? `<div class="foot">
+      ${(demo.verdict || []).map(v => `<span class="badge ${v.cls}">${escapeHtml(v.text)}</span>`).join('')}
+      ${demo.note ? `<span class="note">${demo.note}</span>` : ''}
+    </div>` : ''}`;
+
+  const bar = document.getElementById('subtabs');
+  const panel = document.getElementById('panel');
+  let active = 0;
+  const draw = () => {
+    bar.innerHTML = demo.tabs.map((t, i) =>
+      `<button class="subtab${i === active ? ' active' : ''}" data-i="${i}">${escapeHtml(t.label)}` +
+      `${t.hint ? `<span class="hint">${escapeHtml(t.hint)}</span>` : ''}</button>`).join('');
+    bar.querySelectorAll('.subtab').forEach(b =>
+      b.addEventListener('click', () => { active = +b.dataset.i; draw(); }));
+    panel.innerHTML = renderTab(demo.tabs[active]);
+    panel.scrollTop = 0;
+  };
+  draw();
+}
+
+const pick = () => render(DEMOS[decodeURIComponent(location.hash.slice(1))]);
+window.addEventListener('hashchange', pick);
+pick();
+</script>
+</body>
+</html>
+

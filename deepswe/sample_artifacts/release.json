@@ -1,0 +1,7 @@
+{
+  "release_id": "local",
+  "artifact_base_url": "artifacts",
+  "artifact_patterns": {
+    "trajectory": "trial-artifacts/{trial_name}/agent/trajectory.json"
+  }
+}

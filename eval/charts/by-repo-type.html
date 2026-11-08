@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>分 repo 类型的编码通过率横评</title>
+<style>
+  :root{
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,"PingFang SC","Microsoft YaHei",sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --ink:#1a1a1a;--muted:#9a9aa0;--muted2:#b8b8be;--border:#e6e6e6;
+    --accent:#489034;--accent-deep:#163f17;  /* 我方 v1.3: Vitality Green → Ink Core Green */
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#f4f4f5;font-family:var(--font);color:var(--ink);
+    -webkit-font-smoothing:antialiased;padding:40px 20px;display:flex;justify-content:center;}
+  .card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:30px 30px 26px;
+    width:100%;max-width:1360px;box-shadow:0 1px 2px rgba(0,0,0,.04),0 8px 28px rgba(0,0,0,.05);}
+  .title{font-size:19px;font-weight:650;letter-spacing:-.01em;margin:0;line-height:1.3;max-width:760px;}
+  .subtitle{font-size:13.5px;color:var(--muted);margin:7px 0 0;line-height:1.5;max-width:900px;}
+  .grid{display:grid;gap:14px;margin-top:22px;}
+  .panel{background:#fafafb;border:1px solid var(--border);
+    border-radius:12px;padding:12px 12px 6px;}
+  .panel-name{font-size:12.5px;font-weight:600;color:var(--ink);line-height:1.3;}
+  .panel-dom{font-size:11px;font-weight:500;color:var(--muted2);margin-left:5px;}
+  .note{font-size:13px;color:var(--muted);margin:20px 0 0;line-height:1.5;max-width:760px;}
+  svg text{font-family:var(--font);}
+  .blogo{fill:#1a1a1a;opacity:.78;}                /* 灰柱上的单色 logo */
+  .bar-hl .blogo{opacity:1;}
+  .bar-hl .blogo,.bar-hl .blogo path{fill:#fff;}   /* 高亮(绿)柱上 logo 翻白 */
+  .barrect{transition:y .5s cubic-bezier(.22,.61,.36,1),height .5s cubic-bezier(.22,.61,.36,1);}
+  .grp{cursor:default;}
+  .grp:hover .barrect{filter:brightness(1.05);}
+  @media (prefers-reduced-motion:reduce){.barrect{transition:none;}}
+  #tip{position:fixed;z-index:50;pointer-events:none;background:#111;color:#fff;border-radius:8px;
+    padding:8px 11px;font-size:12.5px;line-height:1.5;box-shadow:0 6px 20px rgba(0,0,0,.25);
+    opacity:0;transition:opacity .12s;white-space:nowrap;}
+  #tip .t-cat{font-weight:600;margin-bottom:2px;} #tip b{color:#fff;} #tip .t-dim{color:#cfcfd4;}
+  #tip .t-up{color:#7fd4a0;} #tip .t-down{color:#ff8f87;}
+</style>
+</head>
+<body>
+<div class="card">
+  <h2 class="title" id="title"></h2>
+  <p class="subtitle" id="subtitle"></p>
+  <div class="grid" id="grid"></div>
+  <p class="note" id="note"></p>
+</div>
+<div id="tip"></div>
+
+<script>
+/* ╔══════════════════════════════════════════════════════════════╗
+   ║  DATA — edit this block only.                                ║
+   ╚══════════════════════════════════════════════════════════════╝
+   6 个 repo 类型面板，2×3 网格，一张白卡。面板内一根柱 = 一个模型：
+   我方系列 base→v1.3（v1.3 为 `hi:true` 绿色高亮基线），后接竞品 GLM5.1 / K2.6。
+   `dividerAfter` 在该下标柱之后画一条虚线，分隔"我方 | 竞品"。
+   `dom` 是面板名后的小灰字（这里放样本量 n）。
+   竞品柱的 `delta` 是相对我方 v1.3 的差距（取自原表，正=反超/负=落后），
+   悬停时显示；正绿负红。所有面板共用 max，跨类别柱高可直接比较。 */
+const TITLE    = "分 repo 类型：RL vs 对比模型";
+const SUBTITLE = "越高越好（通过率 %）。绿柱为我方 RL；灰柱为对比模型 GLM5.1 / K2.6。每格一类 repo，n 为该类样本数。";
+const NOTE     = "竞品柱悬停可见其相对 RL 的差距（G-Δ / K-Δ，取自原表）。前端/UI 是唯一两家对比模型都落后我方的类别；SDK/Library 上三方基本持平。";
+
+const AXIS_MAX = 70;                 // 共用 y 轴上限
+const AXIS_TICKS = [0, 35, 70];      // 共用刻度
+const GRID_COLS = 3;                 // 每行面板数
+
+const PANELS = [
+  {
+    name:"全栈 Web", dom:"n=192", dividerAfter:0,
+    bars:[
+      {label:"RL", logo:"kat", value:43, hi:true},
+      {label:"GLM5.1", logo:"zhipu", value:52, delta:9},
+      {label:"K2.6",   logo:"kimi",  value:56, delta:14},
+    ],
+  },
+  {
+    name:"安全 / 认证", dom:"n=158", dividerAfter:0,
+    bars:[
+      {label:"RL", logo:"kat", value:38, hi:true},
+      {label:"GLM5.1", logo:"zhipu", value:45, delta:7},
+      {label:"K2.6",   logo:"kimi",  value:51, delta:13},
+    ],
+  },
+  {
+    name:"前端 / UI / Web", dom:"n=121", dividerAfter:0,
+    bars:[
+      {label:"RL", logo:"kat", value:50, hi:true},
+      {label:"GLM5.1", logo:"zhipu", value:37, delta:-13},
+      {label:"K2.6",   logo:"kimi",  value:36, delta:-14},
+    ],
+  },
+  {
+    name:"DevOps / 基础设施", dom:"n=96", dividerAfter:0,
+    bars:[
+      {label:"RL", logo:"kat", value:54, hi:true},
+      {label:"GLM5.1", logo:"zhipu", value:53, delta:-1},
+      {label:"K2.6",   logo:"kimi",  value:57, delta:3},
+    ],
+  },
+  {
+    name:"SDK / Library", dom:"n=85", dividerAfter:0,
+    bars:[
+      {label:"RL", logo:"kat", value:32, hi:true},
+      {label:"GLM5.1", logo:"zhipu", value:33, delta:-1},
+      {label:"K2.6",   logo:"kimi",  value:32, delta:0},
+    ],
+  },
+  {
+    name:"桌面应用", dom:"n=79", dividerAfter:0,
+    bars:[
+      {label:"RL", logo:"kat", value:63, hi:true},
+      {label:"GLM5.1", logo:"zhipu", value:61, delta:4},
+      {label:"K2.6",   logo:"kimi",  value:65, delta:1},
+    ],
+  },
+];
+/* ────────────────────────── end DATA ────────────────────────── */
+
+
+/* ── logo registry (reusable reference data) ──────────────────────────────
+   Each entry: viewBox + inner SVG markup. Monochrome logos (no fill attr)
+   inherit `.blogo` fill and flip white on the highlighted bar. */
+const LOGOS = {
+  kat:{vb:"0 0 127.73 74.83",w:26,h:15.2,inner:'<path fill="#000" d="M31.008 32.516V12.992c0-1.219.988-2.207 2.207-2.207h61.031c1.219 0 2.203.988 2.203 2.207v19.524h10.789V12.992C107.238 5.828 101.41 0 94.246 0H33.215C26.051 0 20.223 5.828 20.223 12.992v19.524z"></path><path fill="#000" d="M96.449 42.145v19.523c0 1.219-.984 2.207-2.203 2.207H33.215c-1.219 0-2.207-.988-2.207-2.207V42.145H20.223v19.523c0 7.164 5.828 12.992 12.992 12.992h61.031c7.164 0 12.992-5.828 12.992-12.992V42.145z"></path><path fill="#489034" d="M42.863 31 .012 15.324v12.223l26.847 9.816L.012 47.184v12.222L42.863 43.742z"></path><path fill="#489034" d="M84.598 31l42.851-15.676v12.223l-26.848 9.816 26.848 9.821v12.222L84.598 43.742z"></path><path fill="#489034" d="M72.496 27.488H60.812l-5.847 19.266h11.683z"></path>'},
+  kimi:{vb:"0 0 24 24",w:15,h:15,inner:'<path d="M21.846 0a1.923 1.923 0 110 3.846H20.15a.226.226 0 01-.227-.226V1.923C19.923.861 20.784 0 21.846 0z"></path><path d="M11.065 11.199l7.257-7.2c.137-.136.06-.41-.116-.41H14.3a.164.164 0 00-.117.051l-7.82 7.756c-.122.12-.302.013-.302-.179V3.82c0-.127-.083-.23-.185-.23H3.186c-.103 0-.186.103-.186.23V19.77c0 .128.083.23.186.23h2.69c.103 0 .186-.102.186-.23v-3.25c0-.069.025-.135.069-.178l2.424-2.406a.158.158 0 01.205-.023l6.484 4.772a7.677 7.677 0 003.453 1.283c.108.012.2-.095.2-.23v-3.06c0-.117-.07-.212-.164-.227a5.028 5.028 0 01-2.027-.807l-5.613-4.064c-.117-.078-.132-.279-.028-.381z"></path>'},
+  zhipu:{vb:"0 0 24 24",w:15,h:15,inner:'<path d="M12.105 2L9.927 4.953H.653L2.83 2h9.276zM23.254 19.048L21.078 22h-9.242l2.174-2.952h9.244zM24 2L9.264 22H0L14.736 2H24z"></path>'},
+};
+
+const tip=document.getElementById("tip");
+function showTip(html,e){tip.innerHTML=html;tip.style.opacity=1;moveTip(e);}
+function moveTip(e){const pad=14;let x=e.clientX+pad,y=e.clientY+pad;const r=tip.getBoundingClientRect();
+  if(x+r.width>innerWidth)x=e.clientX-r.width-pad;if(y+r.height>innerHeight)y=e.clientY-r.height-pad;
+  tip.style.left=x+"px";tip.style.top=y+"px";}
+function hideTip(){tip.style.opacity=0;}
+const NS="http://www.w3.org/2000/svg";
+const el=(n,a)=>{const x=document.createElementNS(NS,n);for(const k in a)x.setAttribute(k,a[k]);return x;};
+const fmtShow=v=>Number.isInteger(v)?String(v):(Math.round(v*100)/100).toString();
+const fmtDelta=d=>(d>0?"+":(d<0?"−":"±"))+Math.abs(d)+"%";
+
+let UID=0;
+function renderPanel(p){
+  const W=240,H=252,padL=26,padR=10,padT=26,padB=66;
+  const baseY=H-padB, topY=padT, plotH=baseY-topY;
+  const max=p.max ?? AXIS_MAX;
+  const ticks=p.ticks ?? AXIS_TICKS;
+  const y=v=>baseY-(v/max)*plotH;
+  const n=p.bars.length, innerW=W-padL-padR, slot=innerW/n;
+  const barW=Math.min(40,slot*0.5);
+  const uid=++UID;
+
+  const wrap=document.createElement("div");wrap.className="panel";
+  const head=document.createElement("div");
+  head.innerHTML=`<span class="panel-name">${p.name}</span>`+(p.dom?`<span class="panel-dom">${p.dom}</span>`:"");
+  wrap.appendChild(head);
+
+  const svg=el("svg",{viewBox:`0 0 ${W} ${H}`,width:"100%",style:"display:block;margin-top:8px;overflow:visible",
+    role:"img","aria-label":p.name});
+  const defs=el("defs",{});
+  const gh=el("linearGradient",{id:`hl${uid}`,x1:0,y1:1,x2:0,y2:0});
+  gh.appendChild(el("stop",{offset:"0%","stop-color":"var(--accent)"}));
+  gh.appendChild(el("stop",{offset:"100%","stop-color":"var(--accent-deep)"}));
+  const gg=el("linearGradient",{id:`gr${uid}`,x1:0,y1:1,x2:0,y2:0});
+  gg.appendChild(el("stop",{offset:"0%","stop-color":"#d4d4d4"}));
+  gg.appendChild(el("stop",{offset:"100%","stop-color":"#b3b3b3"}));
+  defs.appendChild(gh);defs.appendChild(gg);svg.appendChild(defs);
+
+  ticks.forEach(t=>{
+    const gy=y(t);
+    svg.appendChild(el("line",{x1:padL,x2:W-padR,y1:gy,y2:gy,stroke:"#e6e6e6","stroke-width":1,opacity:t===0?.9:.55}));
+    const lab=el("text",{x:padL-6,y:gy+3.5,"text-anchor":"end","font-size":10,fill:"#9a9aa0"});
+    lab.textContent=t;svg.appendChild(lab);
+  });
+  svg.appendChild(el("line",{x1:padL,x2:padL,y1:topY-4,y2:baseY,stroke:"#d8d8dc","stroke-width":1}));
+  svg.appendChild(el("line",{x1:padL,x2:W-padR,y1:baseY,y2:baseY,stroke:"#c8c8ce","stroke-width":1}));
+
+  // "我方 | 竞品" 分隔虚线
+  if(p.dividerAfter!=null && p.dividerAfter<n-1){
+    const dx=padL+slot*(p.dividerAfter+1);
+    svg.appendChild(el("line",{x1:dx,x2:dx,y1:topY-4,y2:baseY+2,stroke:"#cfcfd4","stroke-width":1,"stroke-dasharray":"3 3"}));
+  }
+
+  p.bars.forEach((b,i)=>{
+    const cx=padL+slot*(i+0.5);
+    const ty=y(b.value), h=baseY-ty;
+    const g=el("g",{class:"grp"+(b.hi?" bar-hl":"")});
+
+    const rect=el("rect",{class:"barrect",x:cx-barW/2,y:baseY,width:barW,height:0,rx:3,
+      fill:`url(#${b.hi?"hl":"gr"}${uid})`,opacity:b.missing?.4:1});
+    g.appendChild(rect);
+    if(!b.missing) requestAnimationFrame(()=>requestAnimationFrame(()=>{rect.setAttribute("y",ty);rect.setAttribute("height",Math.max(0,h));}));
+
+    const sc=el("text",{x:cx,y:(b.missing?baseY-6:ty-7),"text-anchor":"middle","font-size":10.5,"font-family":"var(--mono)",
+      "font-weight":b.hi?700:600,fill:b.hi?"var(--accent-deep)":"#6b7280"});
+    sc.textContent=b.missing?"—":fmtShow(b.value);g.appendChild(sc);
+
+    if(!b.missing){
+      const L=LOGOS[b.logo], ly=ty+5;
+      if(L){
+        const lw=L.w??12, lh=L.h??12;
+        const lg=el("svg",{class:"blogo",x:cx-lw/2,y:ly,width:lw,height:lh,viewBox:L.vb});
+        lg.innerHTML=L.inner;g.appendChild(lg);
+      }else{
+        const fl=el("text",{x:cx,y:ly+12,"text-anchor":"middle","font-size":11,"font-weight":700,
+          fill:b.hi?"#fff":"#6b7280"});
+        fl.textContent=(b.label||"?").trim()[0];g.appendChild(fl);
+      }
+    }
+
+    const lx=cx, lyb=baseY+9;
+    const t=el("text",{x:lx,y:lyb,"text-anchor":"end","font-size":9,
+      "font-weight":b.hi?700:500,fill:b.hi?"var(--accent)":"#5b6270",
+      transform:`rotate(-45 ${lx} ${lyb})`});
+    t.textContent=b.label;g.appendChild(t);
+
+    const hit=el("rect",{x:cx-slot/2,y:topY-6,width:slot,height:plotH+10,fill:"transparent"});
+    let tipHtml=`<div class="t-cat">${b.label} · ${p.name}</div><b>${b.missing?"—":fmtShow(b.value)+"%"}</b>`;
+    if(b.delta!=null){
+      const cls=b.delta>0?"t-up":(b.delta<0?"t-down":"t-dim");
+      tipHtml+=` <span class="${cls}">vs v1.3 ${fmtDelta(b.delta)}</span>`;
+    }
+    hit.addEventListener("mousemove",e=>showTip(tipHtml,e));
+    hit.addEventListener("mouseleave",hideTip);g.appendChild(hit);
+
+    svg.appendChild(g);
+  });
+
+  wrap.appendChild(svg);
+  return wrap;
+}
+
+document.getElementById("title").textContent=TITLE;
+const sub=document.getElementById("subtitle");if(SUBTITLE)sub.textContent=SUBTITLE;else sub.style.display="none";
+const note=document.getElementById("note");if(NOTE)note.textContent=NOTE;else note.style.display="none";
+const host=document.getElementById("grid");
+host.style.gridTemplateColumns=`repeat(${GRID_COLS},1fr)`;
+PANELS.forEach(p=>host.appendChild(renderPanel(p)));
+addEventListener("scroll",hideTip,true);
+</script>
+</body>
+</html>
+

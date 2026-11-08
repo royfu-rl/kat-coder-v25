@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Qwen-35B — SWE-Bench 横评</title>
+<style>
+:root{
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,"PingFang SC","Microsoft YaHei",sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --ink:#1a1a1a;--muted:#9a9aa0;--muted2:#b8b8be;--border:#e6e6e6;
+    --accent:#489034;--accent-deep:#163f17;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:transparent;font-family:var(--font);color:var(--ink);
+    -webkit-font-smoothing:antialiased;padding:4px 2px;display:flex;justify-content:center;}
+.card{background:transparent;border:none;border-radius:0;padding:0;
+    width:100%;max-width:1340px;box-shadow:none;}
+.title{font-size:19px;font-weight:650;letter-spacing:-.01em;margin:0;line-height:1.3;max-width:760px;}
+.subtitle{font-size:13.5px;color:var(--muted);margin:7px 0 0;line-height:1.5;max-width:760px;}
+/* 4 panels: one even row, then 2+2, then stacked */
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:0;}
+@media (max-width:780px){.grid{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:620px){.grid{grid-template-columns:1fr;}}
+.panel{background:#fafafb;border:1px solid var(--border);
+    border-radius:10px;padding:10px 10px 4px;}
+.panel-name{font-size:12.5px;font-weight:600;color:var(--ink);line-height:1.3;}
+.panel-dom{font-size:11px;font-weight:500;color:var(--muted2);margin-left:5px;}
+.note{font-size:13px;color:var(--muted);margin:20px 0 0;line-height:1.5;max-width:760px;}
+svg text{font-family:var(--font);}
+.blogo{fill:#1a1a1a;opacity:.72;}
+.bar-hl .blogo{opacity:1;}
+.bar-hl .blogo,.bar-hl .blogo path{fill:#fff;}
+.barrect{transition:y .5s cubic-bezier(.22,.61,.36,1),height .5s cubic-bezier(.22,.61,.36,1);}
+.grp{cursor:default;}
+.grp:hover .barrect{filter:brightness(1.05);}
+@media (prefers-reduced-motion:reduce){.barrect{transition:none;}}
+#tip{position:fixed;z-index:50;pointer-events:none;background:#111;color:#fff;border-radius:8px;
+    padding:8px 11px;font-size:12.5px;line-height:1.5;box-shadow:0 6px 20px rgba(0,0,0,.25);
+    opacity:0;transition:opacity .12s;white-space:nowrap;}
+#tip .t-cat{font-weight:600;margin-bottom:2px;} #tip b{color:#fff;} #tip .t-dim{color:#cfcfd4;}
+</style>
+</head>
+<body>
+<div class="card">
+<h2 class="title" id="title"></h2>
+<p class="subtitle" id="subtitle"></p>
+<div class="grid" id="grid"></div>
+<p class="note" id="note"></p>
+</div>
+<div id="tip"></div>
+
+<script>
+const TITLE    = "";
+const SUBTITLE = "";
+const NOTE     = "";
+
+const PANELS = [
+{
+    name: "SWE-Bench Verified", max: 80, ticks: [0, 40, 80],
+    bars: [
+    {label:"Qwen-3.5-35B",           logo:"qwen",  value:65.2},
+    {label:"Qwen-3.5-35B-rl",        logo:"qwen",  value:66.2, hi:true},
+    {label:"Qwen-3.6-35B",           logo:"qwen",  value:65.2},
+    {label:"Qwen-3.6-35B-sft",       logo:"qwen",  value:67.6, hi:true},
+    {label:"Qwen-3.6-35B-sft-rl-v1", logo:"qwen",  value:68.6, hi:true},
+    {label:"Qwen-3.5-397B",          logo:"qwen",  value:72.8},
+    {label:"GLM-5.1",                logo:"zhipu", value:72.4},
+    ],
+},
+{
+    name: "SWE-Bench Multilingual", max: 70, ticks: [0, 35, 70],
+    bars: [
+    {label:"Qwen-3.5-35B",           logo:"qwen",  value:54.0},
+    {label:"Qwen-3.5-35B-rl",        logo:"qwen",  value:61.0, hi:true},
+    {label:"Qwen-3.6-35B",           logo:"qwen",  value:57.0},
+    {label:"Qwen-3.6-35B-sft",       logo:"qwen",  value:58.7, hi:true},
+    {label:"Qwen-3.6-35B-sft-rl-v1", logo:"qwen",  value:63.3, hi:true},
+    {label:"Qwen-3.5-397B",          logo:"qwen",  value:60.5},
+    {label:"GLM-5.1",                logo:"zhipu", value:64.3},
+    ],
+},
+{
+    name: "SWE-Bench Pro", dom: "200 子集", max: 60, ticks: [0, 30, 60],
+    bars: [
+    {label:"Qwen-3.5-35B",           logo:"qwen",  value:35.0},
+    {label:"Qwen-3.5-35B-rl",        logo:"qwen",  value:39.5, hi:true},
+    {label:"Qwen-3.6-35B",           logo:"qwen",  value:42.0},
+    {label:"Qwen-3.6-35B-sft",       logo:"qwen",  value:44.5, hi:true},
+    {label:"Qwen-3.6-35B-sft-rl-v1", logo:"qwen",  value:47.5, hi:true},
+    {label:"Qwen-3.6-35B-sft-rl-v2", logo:"qwen",  value:49.0, hi:true},
+    {label:"Qwen-3.5-397B",          logo:"qwen",  value:44.0},
+    {label:"GLM-5.1",                logo:"zhipu", value:44.5},
+    ],
+},
+{
+    name: "OOD swerebench", dom: "16 语言 × 10", max: 60, ticks: [0, 30, 60],
+    bars: [
+    {label:"Qwen-3.5-35B",           logo:"qwen",  value:44.1},
+    {label:"Qwen-3.5-35B-rl",        logo:"qwen",  value:48.9, hi:true},
+    {label:"Qwen-3.6-35B",           logo:"qwen",  value:42.8},
+    {label:"Qwen-3.6-35B-sft",       logo:"qwen",  value:46.2, hi:true},
+    {label:"Qwen-3.6-35B-sft-rl-v1", logo:"qwen",  value:49.6, hi:true},
+    {label:"Qwen-3.6-35B-sft-rl-v2", logo:"qwen",  value:48.9, hi:true},
+    {label:"Qwen-3.5-397B",          logo:"qwen",  value:46.9},
+    {label:"GLM-5.1",                logo:"zhipu", value:46.2},
+    ],
+},
+];
+
+const LOGOS = {
+qwen:{vb:"0 0 24 24",inner:'<path d="M12.604 1.34c.393.69.784 1.382 1.174 2.075a.18.18 0 00.157.091h5.552c.174 0 .322.11.446.327l1.454 2.57c.19.337.24.478.024.837-.26.43-.513.864-.76 1.3l-.367.658c-.106.196-.223.28-.04.512l2.652 4.637c.172.301.111.494-.043.77-.437.785-.882 1.564-1.335 2.34-.159.272-.352.375-.68.37-.777-.016-1.552-.01-2.327.016a.099.099 0 00-.081.05 575.097 575.097 0 01-2.705 4.74c-.169.293-.38.363-.725.364-.997.003-2.002.004-3.017.002a.537.537 0 01-.465-.271l-1.335-2.323a.09.09 0 00-.083-.049H4.982c-.285.03-.553-.001-.805-.092l-1.603-2.77a.543.543 0 01-.002-.54l1.207-2.12a.198.198 0 000-.197 550.951 550.951 0 01-1.875-3.272l-.79-1.395c-.16-.31-.173-.496.095-.965.465-.813.927-1.625 1.387-2.436.132-.234.304-.334.584-.335a338.3 338.3 0 012.589-.001.124.124 0 00.107-.063l2.806-4.895a.488.488 0 01.422-.246c.524-.001 1.053 0 1.583-.006L11.704 1c.341-.003.724.032.9.34zm-3.432.403a.06.06 0 00-.052.03L6.254 6.788a.157.157 0 01-.135.078H3.253c-.056 0-.07.025-.041.074l5.81 10.156c.025.042.013.062-.034.063l-2.795.015a.218.218 0 00-.2.116l-1.32 2.31c-.044.078-.021.118.068.118l5.716.008c.046 0 .08.02.104.061l1.403 2.454c.046.081.092.082.139 0l5.006-8.76.783-1.382a.055.055 0 01.096 0l1.424 2.53a.122.122 0 00.107.062l2.763-.02a.04.04 0 00.035-.02.041.041 0 000-.04l-2.9-5.086a.108.108 0 010-.113l.293-.507 1.12-1.977c.024-.041.012-.062-.035-.062H9.2c-.059 0-.073-.026-.043-.077l1.434-2.505a.107.107 0 000-.114L9.225 1.774a.06.06 0 00-.053-.031zm6.29 8.02c.046 0 .058.02.034.06l-.832 1.465-2.613 4.585a.056.056 0 01-.05.029.058.058 0 01-.05-.029L8.498 9.841c-.02-.034-.01-.052.028-.054l.216-.012 6.722-.012z"></path>'},
+zhipu:{vb:"0 0 24 24",inner:'<path d="M12.105 2L9.927 4.953H.653L2.83 2h9.276zM23.254 19.048L21.078 22h-9.242l2.174-2.952h9.244zM24 2L9.264 22H0L14.736 2H24z"></path>'},
+};
+
+const tip=document.getElementById("tip");
+function showTip(html,e){tip.innerHTML=html;tip.style.opacity=1;moveTip(e);}
+function moveTip(e){const pad=14;let x=e.clientX+pad,y=e.clientY+pad;const r=tip.getBoundingClientRect();
+if(x+r.width>innerWidth)x=e.clientX-r.width-pad;if(y+r.height>innerHeight)y=e.clientY-r.height-pad;
+tip.style.left=x+"px";tip.style.top=y+"px";}
+function hideTip(){tip.style.opacity=0;}
+const NS="http://www.w3.org/2000/svg";
+const el=(n,a)=>{const x=document.createElementNS(NS,n);for(const k in a)x.setAttribute(k,a[k]);return x;};
+const fmtShow=v=>v.toFixed(1);
+
+let UID=0;
+function renderPanel(p){
+const W=270,H=210,padL=24,padR=8,padT=22,padB=70;   // W:H sets the panel aspect
+const baseY=H-padB, topY=padT, plotH=baseY-topY;
+const max=p.max ?? Math.max(...p.bars.map(b=>b.value))*1.12;
+const ticks=p.ticks ?? [0,+(max/2).toFixed(0),+max.toFixed(0)];
+const y=v=>baseY-(v/max)*plotH;
+const n=p.bars.length, innerW=W-padL-padR, slot=innerW/n;
+const barW=Math.min(22,slot*0.6);
+const uid=++UID;
+
+const wrap=document.createElement("div");wrap.className="panel";
+const head=document.createElement("div");
+head.innerHTML=`<span class="panel-name">${p.name}</span>`+(p.dom?`<span class="panel-dom">${p.dom}</span>`:"");
+wrap.appendChild(head);
+
+const svg=el("svg",{viewBox:`0 0 ${W} ${H}`,width:"100%",style:"display:block;margin-top:10px;overflow:visible",
+    role:"img","aria-label":p.name});
+const defs=el("defs",{});
+const gh=el("linearGradient",{id:`hl${uid}`,x1:0,y1:1,x2:0,y2:0});
+gh.appendChild(el("stop",{offset:"0%","stop-color":"var(--accent)"}));
+gh.appendChild(el("stop",{offset:"100%","stop-color":"var(--accent-deep)"}));
+const gg=el("linearGradient",{id:`gr${uid}`,x1:0,y1:1,x2:0,y2:0});
+gg.appendChild(el("stop",{offset:"0%","stop-color":"#d4d4d4"}));
+gg.appendChild(el("stop",{offset:"100%","stop-color":"#b3b3b3"}));
+defs.appendChild(gh);defs.appendChild(gg);svg.appendChild(defs);
+
+ticks.forEach(t=>{
+    const gy=y(t);
+    svg.appendChild(el("line",{x1:padL,x2:W-padR,y1:gy,y2:gy,stroke:"#e6e6e6","stroke-width":1,opacity:t===0?.9:.55}));
+    const lab=el("text",{x:padL-6,y:gy+3.5,"text-anchor":"end","font-size":10,fill:"#9a9aa0"});
+    lab.textContent=t;svg.appendChild(lab);
+});
+svg.appendChild(el("line",{x1:padL,x2:padL,y1:topY-4,y2:baseY,stroke:"#d8d8dc","stroke-width":1}));
+svg.appendChild(el("line",{x1:padL,x2:W-padR,y1:baseY,y2:baseY,stroke:"#c8c8ce","stroke-width":1}));
+
+p.bars.forEach((b,i)=>{
+    const cx=padL+slot*(i+0.5);
+    const ty=y(b.value), h=baseY-ty;
+    const g=el("g",{class:"grp"+(b.hi?" bar-hl":"")});
+
+    const rect=el("rect",{class:"barrect",x:cx-barW/2,y:baseY,width:barW,height:0,rx:3,
+    fill:`url(#${b.hi?"hl":"gr"}${uid})`,opacity:b.missing?.4:1});
+    g.appendChild(rect);
+    if(!b.missing) requestAnimationFrame(()=>requestAnimationFrame(()=>{rect.setAttribute("y",ty);rect.setAttribute("height",Math.max(0,h));}));
+
+    const sc=el("text",{x:cx,y:(b.missing?baseY-6:ty-6),"text-anchor":"middle","font-size":8,"font-family":"var(--mono)",
+    "font-weight":b.hi?700:600,fill:b.hi?"var(--accent-deep)":"#6b7280"});
+    sc.textContent=b.missing?"—":fmtShow(b.value);g.appendChild(sc);
+
+    if(!b.missing){
+    const L=LOGOS[b.logo], ly=ty+6;
+    if(L){
+        const lw=L.w??13, lh=L.h??13;
+        const lg=el("svg",{class:"blogo",x:cx-lw/2,y:ly,width:lw,height:lh,viewBox:L.vb});
+        lg.innerHTML=L.inner;g.appendChild(lg);
+    }else{
+        const fl=el("text",{x:cx,y:ly+12,"text-anchor":"middle","font-size":11,"font-weight":700,
+        fill:b.hi?"#fff":"#6b7280"});
+        fl.textContent=(b.label||"?").trim()[0];g.appendChild(fl);
+    }
+    }
+
+    const lx=cx, lyb=baseY+9;
+    const t=el("text",{x:lx,y:lyb,"text-anchor":"end","font-size":8.5,
+    "font-weight":b.hi?700:500,fill:b.hi?"var(--accent)":"#5b6270",
+    transform:`rotate(-45 ${lx} ${lyb})`});
+    t.textContent=b.label;g.appendChild(t);
+
+    const hit=el("rect",{x:cx-slot/2,y:topY-6,width:slot,height:plotH+10,fill:"transparent"});
+    const tipHtml=`<div class="t-cat">${b.label} · ${p.name}</div><b>${b.missing?"—":fmtShow(b.value)}</b>`+
+    (b.meta?` <span class="t-dim">· ${b.meta}</span>`:"");
+    hit.addEventListener("mousemove",e=>showTip(tipHtml,e));
+    hit.addEventListener("mouseleave",hideTip);g.appendChild(hit);
+
+    svg.appendChild(g);
+});
+
+wrap.appendChild(svg);
+return wrap;
+}
+
+const titleEl=document.getElementById("title");
+if(TITLE)titleEl.textContent=TITLE;else titleEl.style.display="none";
+const sub=document.getElementById("subtitle");if(SUBTITLE)sub.textContent=SUBTITLE;else sub.style.display="none";
+const note=document.getElementById("note");if(NOTE)note.textContent=NOTE;else note.style.display="none";
+const host=document.getElementById("grid");
+PANELS.forEach(p=>host.appendChild(renderPanel(p)));
+addEventListener("scroll",hideTip,true);
+
+</script>
+</body>
+</html>
+

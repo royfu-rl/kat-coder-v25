@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Failure modes by model</title>
+<style>
+  :root{
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,"PingFang SC","Microsoft YaHei",sans-serif;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+    --ink:#1a1a1a;--muted:#9a9aa0;--muted2:#b8b8be;--hairline:#ececec;--border:#e6e6e6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#f4f4f5;font-family:var(--font);color:var(--ink);
+    -webkit-font-smoothing:antialiased;padding:40px 20px;display:flex;justify-content:center;}
+  .card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:32px 36px 28px;
+    width:100%;max-width:960px;box-shadow:0 1px 2px rgba(0,0,0,.04),0 8px 28px rgba(0,0,0,.05);}
+  .card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:6px;}
+  .title{font-size:22px;font-weight:650;letter-spacing:-.01em;margin:0;}
+  .subtitle{font-size:13px;color:var(--muted);margin:6px 0 20px;line-height:1.5;max-width:760px;}
+  .row{display:grid;grid-template-columns:120px 1fr 46px;align-items:center;column-gap:14px;padding:5px 0;}
+  .row-label{font-size:14px;text-align:right;color:#2a2a2a;white-space:nowrap;font-family:var(--mono);}
+  .bar{display:flex;height:30px;border-radius:3px;overflow:hidden;background:#f5f5f5;}
+  .seg{height:100%;transition:width .55s cubic-bezier(.4,0,.2,1),opacity .2s ease;cursor:pointer;min-width:0;}
+  .seg.dim{opacity:.18;} .seg.hot{box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.35);}
+  .row-n{font-size:12px;color:var(--muted2);font-variant-numeric:tabular-nums;}
+  .legend{margin-top:26px;border-top:1px solid var(--hairline);padding-top:18px;}
+  .leg-group{display:grid;grid-template-columns:130px 1fr;align-items:start;gap:6px 14px;padding:7px 0;}
+  .leg-group+.leg-group{border-top:1px solid #f6f6f6;}
+  .leg-grouptitle{font-size:11px;letter-spacing:.1em;color:var(--muted2);text-transform:uppercase;padding-top:4px;}
+  .leg-items{display:flex;flex-wrap:wrap;gap:8px 16px;}
+  .leg{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-family:var(--mono);color:#3a3a3a;
+    cursor:pointer;padding:4px 8px;border-radius:6px;border:1px solid transparent;transition:background .15s,border-color .15s;user-select:none;}
+  .leg:hover{background:#f6f6f7;} .leg.sel{border-color:#cfcfd4;background:#f1f1f3;} .leg.faded{opacity:.35;}
+  .swatch{width:12px;height:12px;border-radius:3px;flex:none;}
+  #tip{position:fixed;z-index:50;pointer-events:none;background:#111;color:#fff;border-radius:8px;
+    padding:8px 11px;font-size:12.5px;line-height:1.45;box-shadow:0 6px 20px rgba(0,0,0,.25);
+    opacity:0;transform:translateY(4px);transition:opacity .12s;white-space:nowrap;}
+  #tip .t-cat{font-family:var(--mono);font-weight:600;} #tip .t-sub{color:#c8c8cc;} #tip b{color:#fff;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="card-head">
+    <h2 class="title" id="title"></h2>
+  </div>
+  <p class="subtitle" id="subtitle"></p>
+  <div id="rows"></div>
+  <div class="legend" id="legend"></div>
+</div>
+<div id="tip"></div>
+<script>
+const TITLE = "Failure modes by model";
+const SUBTITLE = "SWE-Bench Pro / DeepSWE 轨迹归因，各模型每列样本按 tag 占比归一到 100%。四象限：TP=真通过 / FP=作弊通过 / TN=真失败（按 SWE pipeline 阶段细分）/ FN=判为失败但实为测试或环境问题 / UNCLEAR=证据不足。点击图例可跨模型高亮某一 tag。";
+
+const CATS = [
+  {k:"PASS_LEGITIMATE",            c:"#a7c4a0", g:"TRUE POSITIVE"},
+  {k:"LOCALIZATION_WRONG_FILE",     c:"#3a9ec4", g:"TN · Localization"},
+  {k:"LOCALIZATION_WRONG_FUNCTION", c:"#5ab0d0", g:"TN · Localization"},
+  {k:"TASK_MISINTERPRETED",         c:"#7ac0dc", g:"TN · Localization"},
+  {k:"PATCH_PARTIAL_REQUIREMENT",   c:"#3171c8", g:"TN · Patch Generation"},
+  {k:"PATCH_MISSING_BRANCH",        c:"#5a5cc0", g:"TN · Patch Generation"},
+  {k:"PATCH_LOGIC_ERROR",           c:"#7b3fc0", g:"TN · Patch Generation"},
+  {k:"APPLY_MALFORMED_PATCH",       c:"#c9b97a", g:"TN · Patch Application"},
+  {k:"RUNTIME_UNRESOLVED_REFERENCE",c:"#2f8f8a", g:"TN · Runtime Integrity"},
+  {k:"RUNTIME_STALE_CALLSITE",      c:"#4faaa0", g:"TN · Runtime Integrity"},
+  {k:"F2P_UNCOVERED",               c:"#9c7a48", g:"TN · Fail-to-Pass"},
+  {k:"F2P_NO_PATCH_EMITTED",        c:"#b28f57", g:"TN · Fail-to-Pass"},
+  {k:"F2P_TESTS_NOT_RUN",           c:"#c7a668", g:"TN · Fail-to-Pass"},
+  {k:"P2P_SIGNATURE_BREAK",         c:"#2f9e7a", g:"TN · Pass-to-Pass"},
+  {k:"P2P_IMPORT_TIME_BREAK",       c:"#4fb493", g:"TN · Pass-to-Pass"},
+  {k:"TRAJECTORY_INCOMPLETE",       c:"#8a9098", g:"TN · Trajectory"},
+  {k:"TEST_MISMATCH",               c:"#d98b85", g:"FALSE NEGATIVE"},
+  {k:"TEST_BROKEN",                 c:"#e08a3c", g:"FALSE NEGATIVE"},
+  {k:"AMBIGUOUS_TASK",              c:"#cdb863", g:"FALSE NEGATIVE"},
+  {k:"EXECUTION_EXTERNAL",          c:"#c98f96", g:"FALSE NEGATIVE"},
+  {k:"PASS_CHEATED",                c:"#8a3fc4", g:"FALSE POSITIVE"},
+  {k:"UNCLEAR",                     c:"#c4c4ca", g:"UNCLEAR"},
+];
+const GROUPS = ["TRUE POSITIVE","TN · Localization","TN · Patch Generation","TN · Patch Application",
+  "TN · Runtime Integrity","TN · Fail-to-Pass","TN · Pass-to-Pass","TN · Trajectory",
+  "FALSE NEGATIVE","FALSE POSITIVE","UNCLEAR"];
+
+// order top→bottom: 我方 Pro 三代 + 对比模型，按 PASS_LEGITIMATE 递增
+const ORDER = ["Pro-base","Pro-v1.1","Pro-v1.3","GLM-5.1","Kimi K2.6","GLM-5.2","Claude 4.8"];
+const DIST = {
+  "Pro-base": {PASS_LEGITIMATE:22,PASS_CHEATED:0,LOCALIZATION_WRONG_FILE:1,LOCALIZATION_WRONG_FUNCTION:1,TASK_MISINTERPRETED:1,PATCH_PARTIAL_REQUIREMENT:15,PATCH_MISSING_BRANCH:25,PATCH_LOGIC_ERROR:23,APPLY_MALFORMED_PATCH:1,RUNTIME_UNRESOLVED_REFERENCE:2,RUNTIME_STALE_CALLSITE:1,F2P_UNCOVERED:1,F2P_NO_PATCH_EMITTED:1,F2P_TESTS_NOT_RUN:0,P2P_SIGNATURE_BREAK:0,P2P_IMPORT_TIME_BREAK:1,TRAJECTORY_INCOMPLETE:1,TEST_MISMATCH:3,TEST_BROKEN:0,AMBIGUOUS_TASK:0,EXECUTION_EXTERNAL:1,UNCLEAR:0},
+  "Pro-v1.1": {PASS_LEGITIMATE:28,PASS_CHEATED:0,LOCALIZATION_WRONG_FILE:1,LOCALIZATION_WRONG_FUNCTION:1,TASK_MISINTERPRETED:1,PATCH_PARTIAL_REQUIREMENT:14,PATCH_MISSING_BRANCH:23,PATCH_LOGIC_ERROR:19,APPLY_MALFORMED_PATCH:0,RUNTIME_UNRESOLVED_REFERENCE:4,RUNTIME_STALE_CALLSITE:0,F2P_UNCOVERED:0,F2P_NO_PATCH_EMITTED:0,F2P_TESTS_NOT_RUN:0,P2P_SIGNATURE_BREAK:6,P2P_IMPORT_TIME_BREAK:0,TRAJECTORY_INCOMPLETE:1,TEST_MISMATCH:1,TEST_BROKEN:0,AMBIGUOUS_TASK:0,EXECUTION_EXTERNAL:1,UNCLEAR:0},
+  "Pro-v1.3": {PASS_LEGITIMATE:34,PASS_CHEATED:0,LOCALIZATION_WRONG_FILE:1,LOCALIZATION_WRONG_FUNCTION:1,TASK_MISINTERPRETED:0,PATCH_PARTIAL_REQUIREMENT:13,PATCH_MISSING_BRANCH:24,PATCH_LOGIC_ERROR:19,APPLY_MALFORMED_PATCH:0,RUNTIME_UNRESOLVED_REFERENCE:3,RUNTIME_STALE_CALLSITE:0,F2P_UNCOVERED:1,F2P_NO_PATCH_EMITTED:0,F2P_TESTS_NOT_RUN:0,P2P_SIGNATURE_BREAK:0,P2P_IMPORT_TIME_BREAK:0,TRAJECTORY_INCOMPLETE:2,TEST_MISMATCH:1,TEST_BROKEN:0,AMBIGUOUS_TASK:1,EXECUTION_EXTERNAL:0,UNCLEAR:0},
+  "GLM-5.1":   {PASS_LEGITIMATE:42,PASS_CHEATED:2,LOCALIZATION_WRONG_FILE:1,LOCALIZATION_WRONG_FUNCTION:0,TASK_MISINTERPRETED:1,PATCH_PARTIAL_REQUIREMENT:11,PATCH_MISSING_BRANCH:15,PATCH_LOGIC_ERROR:13,APPLY_MALFORMED_PATCH:0,RUNTIME_UNRESOLVED_REFERENCE:5,RUNTIME_STALE_CALLSITE:1,F2P_UNCOVERED:4,F2P_NO_PATCH_EMITTED:0,F2P_TESTS_NOT_RUN:2,P2P_SIGNATURE_BREAK:0,P2P_IMPORT_TIME_BREAK:0,TRAJECTORY_INCOMPLETE:2,TEST_MISMATCH:1,TEST_BROKEN:0,AMBIGUOUS_TASK:0,EXECUTION_EXTERNAL:0,UNCLEAR:0},
+  "Kimi K2.6": {PASS_LEGITIMATE:43,PASS_CHEATED:1,LOCALIZATION_WRONG_FILE:1,LOCALIZATION_WRONG_FUNCTION:0,TASK_MISINTERPRETED:1,PATCH_PARTIAL_REQUIREMENT:11,PATCH_MISSING_BRANCH:15,PATCH_LOGIC_ERROR:12,APPLY_MALFORMED_PATCH:0,RUNTIME_UNRESOLVED_REFERENCE:6,RUNTIME_STALE_CALLSITE:2,F2P_UNCOVERED:4,F2P_NO_PATCH_EMITTED:0,F2P_TESTS_NOT_RUN:2,P2P_SIGNATURE_BREAK:0,P2P_IMPORT_TIME_BREAK:0,TRAJECTORY_INCOMPLETE:2,TEST_MISMATCH:0,TEST_BROKEN:0,AMBIGUOUS_TASK:0,EXECUTION_EXTERNAL:0,UNCLEAR:0},
+  "GLM-5.2":   {PASS_LEGITIMATE:47,PASS_CHEATED:13,LOCALIZATION_WRONG_FILE:1,LOCALIZATION_WRONG_FUNCTION:0,TASK_MISINTERPRETED:1,PATCH_PARTIAL_REQUIREMENT:8,PATCH_MISSING_BRANCH:10,PATCH_LOGIC_ERROR:8,APPLY_MALFORMED_PATCH:0,RUNTIME_UNRESOLVED_REFERENCE:3,RUNTIME_STALE_CALLSITE:1,F2P_UNCOVERED:3,F2P_NO_PATCH_EMITTED:0,F2P_TESTS_NOT_RUN:2,P2P_SIGNATURE_BREAK:0,P2P_IMPORT_TIME_BREAK:0,TRAJECTORY_INCOMPLETE:2,TEST_MISMATCH:1,TEST_BROKEN:0,AMBIGUOUS_TASK:0,EXECUTION_EXTERNAL:0,UNCLEAR:0},
+  "Claude 4.8":{PASS_LEGITIMATE:58,PASS_CHEATED:8,LOCALIZATION_WRONG_FILE:0,LOCALIZATION_WRONG_FUNCTION:0,TASK_MISINTERPRETED:1,PATCH_PARTIAL_REQUIREMENT:6,PATCH_MISSING_BRANCH:7,PATCH_LOGIC_ERROR:6,APPLY_MALFORMED_PATCH:0,RUNTIME_UNRESOLVED_REFERENCE:2,RUNTIME_STALE_CALLSITE:1,F2P_UNCOVERED:3,F2P_NO_PATCH_EMITTED:0,F2P_TESTS_NOT_RUN:1,P2P_SIGNATURE_BREAK:0,P2P_IMPORT_TIME_BREAK:0,TRAJECTORY_INCOMPLETE:2,TEST_MISMATCH:2,TEST_BROKEN:0,AMBIGUOUS_TASK:3,EXECUTION_EXTERNAL:0,UNCLEAR:0},
+};
+
+const COLOR=Object.fromEntries(CATS.map(c=>[c.k,c.c]));
+const tip=document.getElementById("tip");
+let activeCat=null;
+function showTip(html,e){tip.innerHTML=html;tip.style.opacity=1;moveTip(e);}
+function moveTip(e){const pad=14;let x=e.clientX+pad,y=e.clientY+pad;const r=tip.getBoundingClientRect();
+  if(x+r.width>innerWidth)x=e.clientX-r.width-pad;if(y+r.height>innerHeight)y=e.clientY-r.height-pad;
+  tip.style.left=x+"px";tip.style.top=y+"px";}
+function hideTip(){tip.style.opacity=0;}
+function normalize(d){const s=Object.values(d).reduce((a,b)=>a+b,0)||1;
+  return Object.fromEntries(Object.entries(d).map(([k,v])=>[k,v/s*100]));}
+
+function renderBars(){
+  const rows=document.getElementById("rows");rows.innerHTML="";
+  ORDER.forEach(row=>{
+    const dist=normalize(DIST[row]);
+    let seg="";
+    CATS.forEach(cat=>{const pct=dist[cat.k];if(!pct)return;
+      seg+=`<div class="seg" data-cat="${cat.k}" data-pct="${pct.toFixed(1)}" style="width:${pct}%;background:${cat.c}"></div>`;});
+    const div=document.createElement("div");div.className="row";
+    div.innerHTML=`<div class="row-label">${row}</div><div class="bar">${seg}</div><div class="row-n"></div>`;
+    rows.appendChild(div);
+  });
+  document.querySelectorAll(".seg").forEach(s=>{
+    s.addEventListener("mousemove",e=>showTip(`<div class="t-cat" style="color:${COLOR[s.dataset.cat]}">${s.dataset.cat}</div><div class="t-sub"><b>${s.dataset.pct}%</b></div>`,e));
+    s.addEventListener("mouseleave",hideTip);
+  });
+  applyHighlight();
+}
+function renderLegend(){
+  const legend=document.getElementById("legend");legend.innerHTML="";
+  GROUPS.forEach(g=>{const items=CATS.filter(c=>c.g===g);if(!items.length)return;
+    const wrap=document.createElement("div");wrap.className="leg-group";
+    wrap.innerHTML=`<div class="leg-grouptitle">${g}</div><div class="leg-items">`+
+      items.map(c=>`<span class="leg" data-cat="${c.k}"><span class="swatch" style="background:${c.c}"></span>${c.k}</span>`).join("")+`</div>`;
+    legend.appendChild(wrap);});
+  document.querySelectorAll(".leg").forEach(leg=>leg.addEventListener("click",()=>{
+    activeCat=(activeCat===leg.dataset.cat)?null:leg.dataset.cat;applyHighlight();}));
+}
+function applyHighlight(){
+  document.querySelectorAll(".seg").forEach(s=>{
+    s.classList.toggle("dim",activeCat&&s.dataset.cat!==activeCat);
+    s.classList.toggle("hot",activeCat&&s.dataset.cat===activeCat);});
+  document.querySelectorAll(".leg").forEach(l=>{
+    l.classList.toggle("sel",activeCat&&l.dataset.cat===activeCat);
+    l.classList.toggle("faded",activeCat&&l.dataset.cat!==activeCat);});
+}
+document.getElementById("title").textContent=TITLE;
+document.getElementById("subtitle").textContent=SUBTITLE;
+renderLegend();renderBars();
+addEventListener("scroll",hideTip,true);
+</script>
+</body>
+</html>
+

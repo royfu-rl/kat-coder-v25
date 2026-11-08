@@ -1,0 +1,30 @@
+{
+  "scope": "demo",
+  "n_tasks": 3,
+  "rows": [
+    {
+      "id": "fix-login-bug",
+      "problem_title": "Fix the broken login redirect",
+      "display_description": "Fix the broken login redirect.",
+      "language": "python",
+      "repository": "acme/webapp",
+      "repository_url": "https://github.com/acme/webapp"
+    },
+    {
+      "id": "add-csv-export",
+      "problem_title": "Add CSV export to the report page",
+      "display_description": "Add CSV export to the report page.",
+      "language": "typescript",
+      "repository": "acme/dashboard",
+      "repository_url": "https://github.com/acme/dashboard"
+    },
+    {
+      "id": "optimize-query",
+      "problem_title": "Optimize the slow analytics query",
+      "display_description": "Optimize the slow analytics query.",
+      "language": "go",
+      "repository": "acme/api",
+      "repository_url": "https://github.com/acme/api"
+    }
+  ]
+}

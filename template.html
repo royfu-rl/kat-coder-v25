@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>__TITLE__</title>
+<style>
+  :root{
+    --bg:#ffffff; --bg-soft:#f6f7f9; --bg-band:#f0f2f5;
+    --ink:#111418; --ink-soft:#5b636e; --line:#e4e7ec;
+    --accent:#1a1a1a; --brand:#2f6bff; --brand-soft:#eaf0ff;
+    --radius:14px; --maxw:1180px; --gutter:clamp(20px, 4vw, 56px);
+    --mono:"SF Mono",ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.65;-webkit-font-smoothing:antialiased}
+
+  /* ---------- header ---------- */
+  .header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.85);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--line)}
+  .header-inner{max-width:var(--maxw);margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px var(--gutter)}
+  .logo{font-weight:700;font-size:17px;letter-spacing:-.01em;display:flex;align-items:center;gap:9px}
+  .logo .logo-img{height:26px;width:auto;display:block}
+  .header-actions{display:flex;gap:10px;align-items:center}
+  .btn{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;padding:7px 14px;border-radius:999px;text-decoration:none;border:1px solid var(--line);color:var(--ink);transition:.15s}
+  .btn svg{width:15px;height:15px;flex:none}
+  .btn:hover{background:var(--bg-soft)}
+  .btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .btn-primary:hover{opacity:.88;background:var(--accent)}
+
+  /* ---------- hero ---------- */
+  .hero-band{position:relative}
+  .hero-band::before{content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(520px 260px at 18% 30%,rgba(47,107,255,.10),transparent 70%),
+               radial-gradient(460px 240px at 50% 0%,rgba(124,58,237,.08),transparent 70%),
+               radial-gradient(520px 260px at 84% 40%,rgba(234,88,12,.09),transparent 70%)}
+  .hero-band::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background-image:radial-gradient(rgba(17,20,24,.11) 1px,transparent 1.2px);background-size:22px 22px;
+    -webkit-mask-image:linear-gradient(#000 0%,transparent 92%);mask-image:linear-gradient(#000 0%,transparent 92%)}
+  .hero{position:relative;z-index:1;max-width:var(--maxw);margin:0 auto;padding:72px var(--gutter) 30px;text-align:center}
+  .hero .eyebrow{font-size:13px;color:var(--ink-soft);letter-spacing:.04em;text-transform:uppercase;font-weight:600}
+  .hero h1{font-size:clamp(42px,7vw,76px);line-height:1.02;margin:14px 0 14px;letter-spacing:-.035em;font-weight:820}
+  .hero .sub{font-size:clamp(16px,2.4vw,21px);color:var(--ink-soft);max-width:720px;margin:0 auto 26px}
+  .hero-links{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .hero-links .btn{font-size:14.5px;font-weight:600;padding:10px 20px;background:#fff}
+  .hero-links .btn:hover{transform:translateY(-1px)}
+  .hero-links .btn-primary{background:var(--accent)}
+  .hero-links a{font-size:14.5px}
+  /* Hugging Face reach — refresh the numbers from the model page when they drift */
+  .hero-stats{display:flex;justify-content:center;flex-wrap:wrap;margin:38px 0 0}
+  .hero-stats .stat{position:relative;padding:0 clamp(20px,3.4vw,44px);text-decoration:none;color:inherit}
+  .hero-stats .stat + .stat::before{content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);
+    width:1px;height:38px;background:var(--line)}
+  .hero-stats b{display:block;font-size:clamp(30px,3.6vw,40px);font-weight:820;line-height:1;
+    letter-spacing:-.035em;color:var(--ink);font-variant-numeric:tabular-nums}
+  .hero-stats .stat:first-child b{color:var(--brand)}
+  .hero-stats .lbl{display:flex;align-items:center;justify-content:center;gap:5px;
+    margin-top:7px;font-size:13px;font-weight:500;color:var(--ink-soft)}
+  .hero-stats .lbl svg{width:13px;height:13px;flex:none;opacity:.75}
+  .hero-stats .stat:hover b{opacity:.78}
+  .hero-stats .stat:hover .lbl{color:var(--ink)}
+  .hero-asof{margin:14px 0 0;font-size:12.5px;color:var(--ink-soft);opacity:.8}
+  .hero-asof a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+
+  /* ---------- result showcase ---------- */
+  .showcase{max-width:var(--maxw);margin:8px auto 10px;padding:0 var(--gutter)}
+  .showcase-grid{display:grid;grid-template-columns:1fr;gap:22px}
+  .result-card{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px 12px;overflow:hidden}
+  .result-head{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .result-card h3{margin:0;font-size:17px;font-weight:700;letter-spacing:-.012em;line-height:1.3}
+  .result-tag{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--ink-soft);background:var(--bg-band);border-radius:999px;padding:2px 8px}
+  .result-card p{margin:5px 0 14px;font-size:13px;color:var(--ink-soft)}
+  .result-card img{width:100%;height:auto;border-radius:8px;display:block}
+  /* height is fitted to the chart at runtime; this is the pre-load fallback */
+  .result-card iframe{width:100%;height:420px;border:none;border-radius:8px;display:block}
+
+  /* ---------- tabs ---------- */
+  .tabs-wrap{position:sticky;top:57px;z-index:40;background:rgba(255,255,255,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);margin-top:36px}
+  .tabs{max-width:var(--maxw);margin:0 auto;display:flex;gap:4px;padding:0 var(--gutter);overflow-x:auto}
+  .tab{appearance:none;border:0;background:none;font-family:inherit;font-size:14.5px;font-weight:600;color:var(--ink-soft);padding:15px 16px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:.15s}
+  .tab:hover{color:var(--ink)}
+  .tab.active{color:var(--ink);border-bottom-color:var(--brand)}
+
+  /* ---------- doc content ---------- */
+  .doc-wrap{max-width:var(--maxw);margin:0 auto;padding:40px var(--gutter) 96px}
+  /* Shell runs wide (charts, tabs); prose keeps a readable measure. */
+  .doc{display:none;animation:fade .25s ease}
+  .doc.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  .breadcrumb{margin:0 0 8px}
+  .breadcrumb a{font-size:13.5px;color:var(--ink-soft);text-decoration:none;font-weight:600}
+  .breadcrumb a:hover{color:var(--brand)}
+
+  .doc h1{font-size:32px;font-weight:800;letter-spacing:-.02em;margin:0 0 8px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+  .doc h2{font-size:23px;font-weight:750;margin:44px 0 14px;letter-spacing:-.01em}
+  .doc h3{font-size:18px;font-weight:700;margin:28px 0 10px}
+  .doc h4{font-size:15.5px;font-weight:700;margin:20px 0 8px;color:var(--ink-soft)}
+  .doc p{margin:12px 0}
+  .doc a{color:var(--brand);text-decoration:none}
+  .doc a:hover{text-decoration:underline}
+  .doc ul,.doc ol{padding-left:24px;margin:12px 0}
+  .doc li{margin:6px 0}
+  .doc img{max-width:100%;height:auto;border-radius:10px;border:1px solid var(--line);margin:8px 0}
+  /* Inline logos inside tables: keep them text-sized (respect the tag's height attr), no border/margin */
+  .doc td img,.doc th img{height:1.1em;width:auto;max-width:none;border:0;border-radius:0;margin:0 4px 0 0;vertical-align:-0.15em;display:inline-block}
+  .doc div[align="center"]{text-align:center;margin:24px 0}
+  .doc code{font-family:var(--mono);font-size:.88em;background:var(--bg-band);padding:2px 6px;border-radius:5px}
+  .doc pre{background:var(--bg-soft);border:1px solid var(--line);border-radius:10px;padding:16px;overflow-x:auto}
+  .doc pre code{background:none;padding:0;font-size:13px;line-height:1.6}
+  .doc blockquote{margin:16px 0;padding:8px 18px;border-left:3px solid var(--brand);background:var(--brand-soft);border-radius:0 8px 8px 0;color:var(--ink-soft)}
+  .doc blockquote p{margin:4px 0}
+  /* ── table — Kimi K3 Full Benchmark Table style ── */
+  /* 撑满容器：原先是 width:fit-content + margin:32px auto，表格按内容收缩
+     再居中，两侧留出大片空白（本站 71 张表格含长文本列，都受影响）。 */
+  .doc table{border-collapse:collapse;width:100%;max-width:100%;margin:32px 0;font-size:13.5px;display:block;overflow-x:auto;background:#fff;border-radius:12px;box-shadow:0 0 0 1px var(--line),0 2px 12px rgba(0,0,0,.05);scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+  .doc table::-webkit-scrollbar{height:4px}
+  .doc table::-webkit-scrollbar-track{background:transparent}
+  .doc table::-webkit-scrollbar-thumb{background:var(--line);border-radius:2px}
+  .doc th{background:#f7f8fa;font-size:11px;font-weight:600;color:var(--ink-soft);letter-spacing:.05em;text-transform:uppercase;padding:11px 16px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--line)}
+  .doc td{padding:10px 16px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.55;background:#fff}
+  .doc tr:last-child td{border-bottom:none}
+  /* sticky first column */
+  .doc th:nth-child(1),.doc td:nth-child(1){position:sticky;left:0;z-index:2;border-right:1px solid var(--line);white-space:nowrap}
+  .doc th:nth-child(1){background:#f7f8fa}
+  .doc td:nth-child(1){background:#fff;font-weight:500}
+  /* hover row */
+  .doc tbody tr:hover td{background:#f9fafb}
+  .doc tbody tr:hover td:nth-child(1){background:#f3f4f6}
+  /* compact columns */
+  .doc td:nth-child(2),.doc td:nth-child(3),.doc td:nth-child(4),.doc td:nth-child(5){white-space:nowrap}
+  /* description column — always the last one, whatever the column count */
+  .doc td:last-child{max-width:420px;white-space:normal}
+  .doc table a{color:var(--brand);text-decoration:none}
+  .doc table a:hover{text-decoration:underline}
+  .doc hr{border:0;border-top:1px solid var(--line);margin:36px 0}
+
+  /* ---------- contents card ---------- */
+  /* The "## Contents" heading and the list after it are lifted into this card at runtime. */
+  .doc .toc{position:relative;margin:0 0 40px;padding:18px 22px 16px;background:var(--bg-soft);
+    border:1px solid var(--line);border-radius:12px}
+  .doc .toc > h2{margin:0 0 10px;padding:0;border:0;font-size:12px;font-weight:800;
+    letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);cursor:default}
+  .doc .toc ul{margin:0;padding-left:18px}
+  .doc .toc ul ul{margin:2px 0}
+  .doc .toc li{margin:3px 0;font-size:14.5px}
+  .doc .toc a{color:var(--ink);text-decoration:none}
+  .doc .toc a:hover{color:var(--brand);text-decoration:underline}
+  .doc .fold-all{position:absolute;top:15px;right:16px;font-family:inherit;font-size:11.5px;
+    color:var(--ink-soft);background:#fff;border:1px solid var(--line);border-radius:999px;
+    padding:3px 11px;cursor:pointer;transition:.15s}
+  .doc .fold-all:hover{color:var(--ink);border-color:#c5cad3}
+
+  /* ---------- foldable sections ---------- */
+  .doc h2.foldable{cursor:pointer;padding-left:26px;position:relative;transition:color .15s}
+  .doc h2.foldable:hover{color:var(--brand)}
+  .doc h2.foldable::before{content:"";position:absolute;left:5px;top:calc(50% - 5px);
+    border-left:6px solid currentColor;border-top:5px solid transparent;border-bottom:5px solid transparent;
+    opacity:.4;transform:rotate(90deg);transform-origin:30% 50%;transition:transform .18s,opacity .15s}
+  .doc h2.foldable:hover::before{opacity:.9}
+  .doc h2.folded::before{transform:rotate(0deg)}
+  .doc .fold-body.folded{display:none}
+  .doc .fold-body.opening{animation:fade .22s ease}
+
+  .footer{border-top:1px solid var(--line);padding:28px var(--gutter);text-align:center;color:var(--ink-soft);font-size:13px}
+
+  /* KaTeX display blocks: give them breathing room and horizontal scroll on overflow */
+  .doc .katex-display{margin:20px 0;overflow-x:auto;overflow-y:hidden;padding:2px 0}
+  .doc .katex{font-size:1.05em}
+</style>
+<style>
+/*__KATEX_CSS__*/
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="logo"><img src="assets/figures/kat-logo.png" alt="KAT" class="logo-img">__TITLE__</div>
+    <div class="header-actions">
+      <a class="btn btn-primary" href="https://streamlake.com/product/kat-coder" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.9 5.6L19.5 9l-5.6 1.9L12 16.5l-1.9-5.6L4.5 9l5.6-1.4z"/><path d="M18.5 14l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z"/></svg>Try KAT-Coder-V2.5 ↗</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="hero-band">
+  <section class="hero">
+    <h1>__TITLE__</h1>
+    <p class="sub">__SUBTITLE__</p>
+    <div class="hero-links">
+      <a class="btn btn-primary" href="__ARXIV__" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>Read the Technical Report</a>
+      <a class="btn" href="https://huggingface.co/Kwaipilot/KAT-Coder-V2.5-Dev" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="11.5" r="7.5"/><path d="M9.2 9.6h.01M14.8 9.6h.01" stroke-width="2.4"/><path d="M8.9 14.2c.8 1.2 1.9 1.8 3.1 1.8s2.3-.6 3.1-1.8"/><path d="M4.3 13.4c-1 .2-1.6 1-1.4 1.9.2.8 1 1.3 1.9 1.2"/><path d="M19.7 13.4c1 .2 1.6 1 1.4 1.9-.2.8-1 1.3-1.9 1.2"/></svg>Hugging Face ↗</a>
+      <a class="btn" href="https://forge.coreweave.com/wandb/544546495-ustc/agentic-rl?nw=nwuser544546495" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="4" cy="5" r="2.1"/><rect x="2.3" y="10" width="3.4" height="11" rx="1.7"/><rect x="10.3" y="3" width="3.4" height="12" rx="1.7"/><circle cx="12" cy="20" r="2.1"/><rect x="18.3" y="8" width="3.4" height="13" rx="1.7"/></svg>W&amp;B Training Runs ↗</a>
+      <a class="btn" href="https://mp.weixin.qq.com/s/79XLhfEe7rdGhqR1M2Xqkg" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="flex:none"><path d="M9.5 4C5.36 4 2 6.69 2 10c0 1.89 1.08 3.57 2.78 4.73L4 17l2.5-1.25C7.27 16.23 8.36 16.5 9.5 16.5c.17 0 .34 0 .5-.01A5.5 5.5 0 0 1 9.5 15c0-2.79 2.52-5 5.5-5 .17 0 .34 0 .5.01C14.97 7.63 12.47 4 9.5 4zM22 15c0-2.21-2.19-4-5-4s-5 1.79-5 4 2.19 4 5 4c.63 0 1.23-.1 1.79-.26L21 20l-.63-1.9C21.22 17.42 22 16.27 22 15z"/></svg>新智元报道 ↗</a>
+    </div>
+    <div class="hero-stats">
+      <a class="stat" href="https://huggingface.co/Kwaipilot/KAT-Coder-V2.5-Dev" target="_blank" rel="noopener"><b>4.87M</b><span class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>downloads</span></a>
+      <a class="stat" href="https://huggingface.co/Kwaipilot/KAT-Coder-V2.5-Dev" target="_blank" rel="noopener"><b>96</b><span class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="2.4"/><circle cx="18" cy="12" r="2.4"/><circle cx="18" cy="20" r="2.4"/><path d="M6 7.4v9.1a2 2 0 0 0 2 2h7.6"/><path d="M6 7.4v1.6a2 2 0 0 0 2 2h7.6"/></svg>derivative models</span></a>
+      <a class="stat" href="https://huggingface.co/Kwaipilot/KAT-Coder-V2.5-Dev" target="_blank" rel="noopener"><b>682</b><span class="lbl"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 20.7l-1.5-1.36C5.4 14.76 2.4 12.04 2.4 8.7 2.4 6.02 4.52 3.9 7.2 3.9c1.5 0 2.96.7 3.9 1.82A5.2 5.2 0 0 1 15 3.9c2.68 0 4.8 2.12 4.8 4.8 0 3.34-3 6.06-8.1 10.65z"/></svg>likes</span></a>
+    </div>
+    <p class="hero-asof">on <a href="https://huggingface.co/Kwaipilot/KAT-Coder-V2.5-Dev" target="_blank" rel="noopener">Hugging Face</a> · 2026-11-05</p>
+  </section>
+  </div>
+
+  <section class="showcase">
+    <div class="showcase-grid">
+      <div class="result-card">
+        <div class="result-head"><h3>KAT-Coder-V2.5-Pro</h3><span class="result-tag">Flagship</span></div>
+        <p>vs GLM / Kimi / Opus across coding benchmarks</p>
+        <iframe src="assets/figures/pro-bench.html" title="KAT-Coder-V2.5-Pro benchmark" loading="lazy"></iframe>
+      </div>
+      <div class="result-card">
+        <div class="result-head"><h3>KAT-Coder-V2.5-Flash</h3><span class="result-tag">Open weights</span></div>
+        <p>SWE-Bench Verified / Multilingual / Pro / OOD</p>
+        <iframe src="assets/figures/flash-bench.html" title="KAT-Coder-V2.5-Flash benchmark" loading="lazy"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <div class="tabs-wrap">
+    <div class="tabs" id="tabs"></div>
+  </div>
+
+  <div class="doc-wrap" id="docs"></div>
+</main>
+
+<script>/*__MARKED__*/</script>
+<script>/*__KATEX_JS__*/</script>
+<script>
+  // ---- constants -----------------------------------------------------------
+  // Combined height of the two sticky bars (header + tabs-wrap) in pixels.
+  // scrollTo subtracts this so the newly-activated section isn't hidden behind them.
+  const STICKY_HEADER_HEIGHT = 60;
+  // Max parent hops when walking up to the nearest tab ancestor.
+  // Guards against cycles if the doc graph is somehow malformed.
+  const MAX_ANCESTOR_DEPTH = 50;
+
+  // ---- data ----------------------------------------------------------------
+  const DOCS   = __DOCS__;
+  const tabsEl = document.getElementById('tabs');
+  const docsEl = document.getElementById('docs');
+
+  /** Map doc id → doc object for O(1) lookup. */
+  const byId = {};
+  DOCS.forEach(doc => { byId[doc.id] = doc; });
+
+  const firstId = DOCS[0].id;
+
+  marked.setOptions({ gfm: true, breaks: false });
+
+  // ---- heading id (TOC anchor support) -------------------------------------
+  // Inject GitHub-style slug ids so TOC links like #1-system-architecture work.
+  marked.use({
+    renderer: {
+      // marked changed this hook's signature across majors: older builds pass
+      // (text, level), newer ones a token object. setup-assets.sh pulls the
+      // latest marked, so accept both rather than pin to one.
+      heading(arg, level) {
+        const text  = typeof arg === 'string' ? arg : (arg.text ?? '');
+        const depth = typeof arg === 'string' ? level : arg.depth;
+        // Strip any HTML tags (e.g. <strong>) to get plain text for slug
+        const plain = String(text).replace(/<[^>]+>/g, '').trim();
+        const slug = plain
+          .toLowerCase()
+          .replace(/[^\w一-鿿\s\-]/g, '') // keep alphanum, CJK, space, hyphen
+          .trim()
+          .replace(/\s+/g, '-');
+        return `<h${depth} id="${slug}">${text}</h${depth}>\n`;
+      }
+    }
+  });
+
+  // ---- math-safe markdown render -------------------------------------------
+  // marked would mangle LaTeX ($a_t$ → emphasis, \frac → lost backslash), so
+  // we stash code spans/blocks first (never treat $ inside code as math), pull
+  // math out to indexed sentinels, run marked, then restore raw $…$/$$…$$ for KaTeX.
+  //
+  // Sentinels wrap the index in Private-Use-Area chars (U+E000…U+E001) that
+  // never occur in real prose or markdown. An earlier scheme used space-padded
+  // " C<n> " / " M<n> " tokens, which collided with ordinary text such as
+  // "美团 M17 fully async" — the restore step then looked up a nonexistent math
+  // entry and threw, aborting the render loop and hiding every later tab.
+  const _S0 = '', _S1 = '';
+  const _CODE_RE = new RegExp(_S0 + 'C(\\d+)' + _S1, 'g');
+  const _MATH_RE = new RegExp(_S0 + 'M(\\d+)' + _S1, 'g');
+  function renderDoc(md) {
+    const codeStash = [];
+    const codeTok = m => { codeStash.push(m); return _S0 + 'C' + (codeStash.length - 1) + _S1; };
+    md = md.replace(/```[\s\S]*?```/g, codeTok);
+    md = md.replace(/`[^`\n]*`/g,      codeTok);
+
+    const mathStash = [];
+    md = md.replace(/\$\$([\s\S]+?)\$\$/g, (_, x) => { mathStash.push({ display: true,  tex: x }); return _S0 + 'M' + (mathStash.length - 1) + _S1; });
+    md = md.replace(/\$([^\$\n]+?)\$/g,    (_, x) => { mathStash.push({ display: false, tex: x }); return _S0 + 'M' + (mathStash.length - 1) + _S1; });
+
+    md = md.replace(_CODE_RE, (_, i) => codeStash[+i]);   // restore code before marked
+    let html = marked.parse(md);
+    html = html.replace(_MATH_RE, (_, i) => {
+      const entry = mathStash[+i];
+      // HTML-escape < > & so the browser doesn't parse LaTeX as HTML tags when
+      // assigned to innerHTML. KaTeX's renderMathInElement reads textContent and
+      // will decode these back to the correct LaTeX characters automatically.
+      const tex = entry.tex.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return entry.display ? ('$$' + tex + '$$') : ('$' + tex + '$');
+    });
+    return html;
+  }
+
+  function typesetMath(el) {
+    if (window.renderMathInElement) renderMathInElement(el, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true  },
+        { left: '$',  right: '$',  display: false },
+      ],
+      throwOnError: false,
+      ignoredTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+    });
+  }
+
+  // ---- contents card + foldable sections -----------------------------------
+  // Each doc opens with a "## Contents" heading plus a link list; that pair is lifted
+  // into a card. Every other h2 owns the nodes after it until the next h1/h2, wrapped
+  // in .fold-body so the heading can collapse its own section.
+
+  function setFold(heading, folded) {
+    const body = heading.nextElementSibling;
+    if (!body || !body.classList.contains('fold-body')) return;
+    heading.classList.toggle('folded', folded);
+    body.classList.toggle('folded', folded);
+    heading.setAttribute('aria-expanded', String(!folded));
+    if (!folded) { body.classList.remove('opening'); void body.offsetWidth; body.classList.add('opening'); }
+  }
+
+  function enhanceDoc(body) {
+    // Contents card
+    let toc = null;
+    const contentsHeading = Array.from(body.querySelectorAll('h2'))
+      .find(h => /^contents$/i.test(h.textContent.trim()));
+    if (contentsHeading && contentsHeading.nextElementSibling &&
+        contentsHeading.nextElementSibling.tagName === 'UL') {
+      const list = contentsHeading.nextElementSibling;
+      toc = document.createElement('nav');
+      toc.className = 'toc';
+      contentsHeading.parentNode.insertBefore(toc, contentsHeading);
+      toc.appendChild(contentsHeading);
+      toc.appendChild(list);
+    }
+
+    // Foldable sections
+    const foldable = [];
+    body.querySelectorAll('h2').forEach(heading => {
+      if (heading.closest('nav, table, details')) return;      // the Contents heading lives in a nav
+      const wrap = document.createElement('div');
+      wrap.className = 'fold-body';
+      let node = heading.nextSibling;
+      while (node && !(node.nodeType === 1 && /^H[12]$/.test(node.tagName))) {
+        const next = node.nextSibling;
+        wrap.appendChild(node);
+        node = next;
+      }
+      if (!wrap.childNodes.length) return;
+      heading.parentNode.insertBefore(wrap, heading.nextSibling);
+      heading.classList.add('foldable');
+      heading.tabIndex = 0;
+      heading.setAttribute('aria-expanded', 'true');
+      heading.title = '点击收起 / 展开本节';
+      heading.addEventListener('click', e => {
+        if (e.target.closest('a[href]')) return;
+        if (String(window.getSelection())) return;             // selecting the title text is not a click
+        setFold(heading, !heading.classList.contains('folded'));
+      });
+      heading.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          setFold(heading, !heading.classList.contains('folded'));
+        }
+      });
+      foldable.push(heading);
+    });
+
+    // Collapse / expand everything, from the Contents card
+    if (toc && foldable.length) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'fold-all';
+      btn.textContent = '全部收起';
+      btn.onclick = () => {
+        const anyOpen = foldable.some(h => !h.classList.contains('folded'));
+        foldable.forEach(h => setFold(h, anyOpen));
+        btn.textContent = anyOpen ? '全部展开' : '全部收起';
+      };
+      toc.appendChild(btn);
+    }
+  }
+
+  // A link into a collapsed section opens it first, so the anchor is never a dead jump.
+  function revealTarget(id) {
+    const target = id && document.getElementById(id);
+    if (!target) return;
+    if (target.classList.contains('foldable') && target.classList.contains('folded')) setFold(target, false);
+    let folded = target.closest('.fold-body.folded');
+    while (folded) {
+      setFold(folded.previousElementSibling, false);
+      folded = folded.parentElement && folded.parentElement.closest('.fold-body.folded');
+    }
+  }
+  document.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (!a) return;
+    const href = a.getAttribute('href');
+    if (href.startsWith('#doc:')) return;                      // handled by the doc-switch interceptor
+    revealTarget(decodeURIComponent(href.slice(1)));
+  }, true);
+
+  // ---- doc-graph traversal -------------------------------------------------
+
+  /** Walk parent links upward to find the nearest tab ancestor of `id`. */
+  function tabAncestor(id) {
+    let doc = byId[id], depth = 0;
+    while (doc && !doc.tab && doc.parent && depth++ < MAX_ANCESTOR_DEPTH) {
+      doc = byId[doc.parent];
+    }
+    return doc ? doc.id : id;
+  }
+
+  // ---- DOM construction ----------------------------------------------------
+
+  DOCS.forEach(docData => {
+    // Tab button (only for top-level tab docs)
+    if (docData.tab) {
+      const btn       = document.createElement('button');
+      btn.className   = 'tab' + (docData.id === firstId ? ' active' : '');
+      btn.textContent = docData.label;
+      btn.dataset.target = docData.id;
+      btn.onclick     = () => activate(docData.id);
+      tabsEl.appendChild(btn);
+    }
+
+    // Article element that holds the rendered markdown
+    const article     = document.createElement('article');
+    article.className = 'doc' + (docData.id === firstId ? ' active' : '');
+    article.id        = 'doc-' + docData.id;
+
+    // Breadcrumb link for sub-docs
+    if (docData.parent && byId[docData.parent]) {
+      const breadcrumb     = document.createElement('div');
+      breadcrumb.className = 'breadcrumb';
+      breadcrumb.innerHTML = '<a href="#">← 返回 ' + byId[docData.parent].label + '</a>';
+      breadcrumb.querySelector('a').onclick = (e) => { e.preventDefault(); activate(docData.parent); };
+      article.appendChild(breadcrumb);
+    }
+
+    // Rendered markdown body
+    const body     = document.createElement('div');
+    body.innerHTML = renderDoc(docData.md);
+
+    // External links open in a new tab; local .md links were rewritten by
+    // build.py to #doc:<id> and are handled by the click interceptor below.
+    body.querySelectorAll('a[href]').forEach(a => {
+      const href = a.getAttribute('href') || '';
+      if (/^(https?:|mailto:)/.test(href)) { a.target = '_blank'; a.rel = 'noopener'; }
+    });
+
+    enhanceDoc(body);
+    typesetMath(body);
+    article.appendChild(body);
+    docsEl.appendChild(article);
+  });
+
+  // ---- navigation ----------------------------------------------------------
+
+  function activate(id) {
+    const doc = byId[id];
+    if (!doc) return;
+
+    const tabId = tabAncestor(id);
+    document.querySelectorAll('.tab').forEach(
+      tab => tab.classList.toggle('active', tab.dataset.target === tabId)
+    );
+    document.querySelectorAll('.doc').forEach(
+      docEl => docEl.classList.toggle('active', docEl.id === 'doc-' + id)
+    );
+
+    if (location.hash.slice(1) !== id) history.replaceState(null, '', '#' + id);
+    window.scrollTo({
+      top: document.querySelector('.tabs-wrap').offsetTop - STICKY_HEADER_HEIGHT,
+      behavior: 'smooth',
+    });
+  }
+
+  // Intercept in-page doc links (build.py rewrites local .md links to #doc:<id>).
+  docsEl.addEventListener('click', (e) => {
+    const a = e.target.closest('a');
+    if (!a) return;
+    const href  = a.getAttribute('href') || '';
+    const match = href.match(/^#doc:(.+)$/);
+    if (match && byId[match[1]]) { e.preventDefault(); activate(match[1]); }
+    // External links (target=_blank) and plain #anchors fall through to default.
+  });
+
+  // ---- benchmark charts ----------------------------------------------------
+  // The charts reflow by width (4 panels per row on a wide screen, fewer when narrow),
+  // so their height is not fixed. Measure the rendered card and size the frame to it.
+  function fitChart(frame) {
+    let card;
+    try {
+      card = frame.contentDocument && frame.contentDocument.querySelector('.card');
+    } catch (err) {
+      return;   // different origin: keep the CSS fallback height
+    }
+    if (!card) return;
+    const apply = () => {
+      frame.style.height = Math.ceil(card.getBoundingClientRect().height) + 8 + 'px';
+    };
+    apply();
+    new ResizeObserver(apply).observe(card);
+  }
+  document.querySelectorAll('.result-card iframe').forEach(frame => {
+    frame.addEventListener('load', () => fitChart(frame));
+    if (frame.contentDocument && frame.contentDocument.readyState === 'complete') fitChart(frame);
+  });
+
+  // Deep-link support: accepts both #<id> and #doc:<id> in the URL hash.
+  const initial = location.hash.slice(1).replace(/^doc:/, '');
+  if (initial && byId[initial]) activate(initial);
+</script>
+</body>
+</html>
+

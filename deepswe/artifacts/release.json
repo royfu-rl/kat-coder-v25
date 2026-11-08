@@ -1,0 +1,10 @@
+{
+  "release_id": "local",
+  "artifact_base_url": "artifacts",
+  "artifact_patterns": {
+    "trajectory": "trial-artifacts/{trial_name}/agent/trajectory.json",
+    "model_patch": "trial-artifacts/{trial_name}/artifacts/model.patch",
+    "agent_log": "trial-artifacts/{trial_name}/agent/agent-log.txt",
+    "verifier_output": "trial-artifacts/{trial_name}/verifier/test-stdout.txt"
+  }
+}

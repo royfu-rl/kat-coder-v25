@@ -1,0 +1,10 @@
+{
+  "name": "AutoEval",
+  "generated_at": "2026-07-19T17:34:04Z",
+  "counts": {
+    "tasks": 113,
+    "repositories": 20,
+    "rollout_attempts": 2640,
+    "trials": 2640
+  }
+}

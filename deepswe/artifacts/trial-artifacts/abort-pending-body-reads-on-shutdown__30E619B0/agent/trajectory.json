@@ -1,0 +1,161 @@
+{
+  "schema_version": "ATIF-v1.7",
+  "agent": {
+    "name": "mini-swe-agent",
+    "version": "2.2.8",
+    "model_name": "anthropic/claude-fable-5"
+  },
+  "steps": [
+    {
+      "step_id": 1,
+      "source": "system",
+      "message": "You are a software engineering agent. Solve the given GitHub issue by editing the repository at /repo."
+    },
+    {
+      "step_id": 2,
+      "source": "user",
+      "message": "Please solve the following GitHub issue in the repository mounted at /repo.\n\n**Repository:** vapor-community/http-server (Go)\n**Issue:** Abort pending body reads on shutdown\n\nWhen the HTTP server is shut down gracefully, handlers that are currently\nblocked reading a large request body continue to block indefinitely.\nThe shutdown call blocks until all active connections are idle, but\nconnections with in-flight body reads never become idle.\n\nExpected behaviour: when `(*Server).Shutdown(ctx)` is called, any goroutine\nblocked inside `req.Body.Read(...)` should receive an error immediately so\nthe handler can return and the connection can be closed.\n\nFiles of interest:\n- server/server.go   — main server struct and Shutdown method\n- server/body.go     — request body reader implementation\n- server/body_test.go — existing tests (all must continue to pass)\n\nYour task: implement the fix and add/extend tests to cover the new behaviour.\n"
+    },
+    {
+      "step_id": 3,
+      "source": "agent",
+      "message": "Let me explore the repo first.",
+      "tool_calls": [
+        {
+          "function_name": "bash",
+          "arguments": {
+            "command": "find /repo -type f -name '*.go' | sort"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "content": "/repo/server/body.go\n/repo/server/body_test.go\n/repo/server/handler.go\n/repo/server/server.go\n/repo/server/server_test.go\n"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 4,
+      "source": "agent",
+      "message": "",
+      "tool_calls": [
+        {
+          "function_name": "bash",
+          "arguments": {
+            "command": "cat /repo/server/body.go /repo/server/server.go"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "content": "package server\n\nimport (\n\t\"io\"\n\t\"sync\"\n)\n\n// bodyReader wraps an underlying reader and tracks whether reading is active.\ntype bodyReader struct {\n\tmu     sync.Mutex\n\tsrc    io.ReadCloser\n\tclosed bool\n}\n\nfunc newBodyReader(r io.ReadCloser) *bodyReader {\n\treturn &bodyReader{src: r}\n}\n\nfunc (b *bodyReader) Read(p []byte) (int, error) {\n\tb.mu.Lock()\n\tif b.closed {\n\t\tb.mu.Unlock()\n\t\treturn 0, io.ErrClosedPipe\n\t}\n\tb.mu.Unlock()\n\treturn b.src.Read(p)\n}\n\nfunc (b *bodyReader) Close() error {\n\tb.mu.Lock()\n\tdefer b.mu.Unlock()\n\tb.closed = true\n\treturn b.src.Close()\n}\n\n// ---\npackage server\n\nimport (\n\t\"context\"\n\t\"net/http\"\n\t\"sync\"\n)\n\n// Server is a thin wrapper around net/http.Server with graceful shutdown.\ntype Server struct {\n\thttpServer *http.Server\n\twg         sync.WaitGroup\n}\n\nfunc New(addr string, handler http.Handler) *Server {\n\treturn &Server{\n\t\thttpServer: &http.Server{Addr: addr, Handler: handler},\n\t}\n}\n\nfunc (s *Server) ListenAndServe() error {\n\treturn s.httpServer.ListenAndServe()\n}\n\nfunc (s *Server) Shutdown(ctx context.Context) error {\n\treturn s.httpServer.Shutdown(ctx)\n}\n"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 5,
+      "source": "agent",
+      "message": "I see the issue. The `bodyReader.Read` is a straight pass-through — no cancellation path. I'll add an abort channel pattern.",
+      "reasoning_content": "Options: (a) context on bodyReader, (b) close a shared channel. Option (b) is simpler because we don't need to thread a context through every Read call.",
+      "tool_calls": [
+        {
+          "function_name": "bash",
+          "arguments": {
+            "command": "grep -n 'Read\\|Close\\|Shutdown' /repo/server/server.go /repo/server/body.go"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "content": "server/server.go:20:func (s *Server) Shutdown(ctx context.Context) error {\nserver/server.go:21:\treturn s.httpServer.Shutdown(ctx)\nbody.go:20:func (b *bodyReader) Read(p []byte) (int, error) {\nbody.go:30:func (b *bodyReader) Close() error {\n"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 6,
+      "source": "agent",
+      "message": "Writing the fixed `body.go`.",
+      "tool_calls": [
+        {
+          "function_name": "write_file",
+          "arguments": {
+            "path": "/repo/server/body.go",
+            "content": "package server\n\nimport (\n\t\"context\"\n\t\"io\"\n\t\"sync\"\n)\n\n// bodyReader wraps an underlying reader. It aborts in-flight reads when\n// the abort context is cancelled (e.g. during server shutdown).\ntype bodyReader struct {\n\tmu      sync.Mutex\n\tsrc     io.ReadCloser\n\tclosed  bool\n\tabortCh chan struct{} // closed when the server is shutting down\n}\n\nfunc newBodyReader(r io.ReadCloser, abortCh chan struct) *bodyReader {\n\treturn &bodyReader{src: r, abortCh: abortCh}\n}\n\nfunc (b *bodyReader) Read(p []byte) (int, error) {\n\tb.mu.Lock()\n\tif b.closed {\n\t\tb.mu.Unlock()\n\t\treturn 0, io.ErrClosedPipe\n\t}\n\tb.mu.Unlock()\n\n\ttype result struct {\n\t\tn   int\n\t\terr error\n\t}\n\tch := make(chan result, 1)\n\tgo func() {\n\t\tn, err := b.src.Read(p)\n\t\tch <- result{n, err}\n\t}()\n\n\tselect {\n\tcase r := <-ch:\n\t\treturn r.n, r.err\n\tcase <-b.abortCh:\n\t\treturn 0, context.Canceled\n\t}\n}\n\nfunc (b *bodyReader) Close() error {\n\tb.mu.Lock()\n\tdefer b.mu.Unlock()\n\tb.closed = true\n\treturn b.src.Close()\n}\n"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "content": "File written."
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 7,
+      "source": "agent",
+      "message": "Writing the fixed `server.go`.",
+      "tool_calls": [
+        {
+          "function_name": "write_file",
+          "arguments": {
+            "path": "/repo/server/server.go",
+            "content": "package server\n\nimport (\n\t\"context\"\n\t\"net/http\"\n\t\"sync\"\n)\n\n// Server is a thin wrapper around net/http.Server with graceful shutdown.\n// On Shutdown, all pending body reads are aborted immediately.\ntype Server struct {\n\thttpServer *http.Server\n\twg         sync.WaitGroup\n\tabortCh    chan struct{} // closed on Shutdown\n\tabortOnce  sync.Once\n}\n\nfunc New(addr string, handler http.Handler) *Server {\n\ts := &Server{abortCh: make(chan struct{})}\n\t// Wrap the user handler so we can inject abortCh into each request's body.\n\twrapped := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {\n\t\tr.Body = newBodyReader(r.Body, s.abortCh)\n\t\ts.wg.Add(1)\n\t\tdefer s.wg.Done()\n\t\thandler.ServeHTTP(w, r)\n\t})\n\ts.httpServer = &http.Server{Addr: addr, Handler: wrapped}\n\treturn s\n}\n\nfunc (s *Server) ListenAndServe() error {\n\treturn s.httpServer.ListenAndServe()\n}\n\n// Shutdown closes the abort channel (interrupting all pending body reads),\n// then delegates to the standard graceful shutdown.\nfunc (s *Server) Shutdown(ctx context.Context) error {\n\ts.abortOnce.Do(func() { close(s.abortCh) })\n\terr := s.httpServer.Shutdown(ctx)\n\ts.wg.Wait()\n\treturn err\n}\n"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "content": "File written."
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 8,
+      "source": "agent",
+      "message": "Adding shutdown-abort test.",
+      "tool_calls": [
+        {
+          "function_name": "bash",
+          "arguments": {
+            "command": "cat >> /repo/server/body_test.go << 'GOEOF'\nfunc TestBodyAbortedOnShutdown(t *testing.T) {\n\tt.Parallel()\n\tblocked := make(chan struct{})\n\tdone := make(chan error, 1)\n\n\tsrv := New(\":0\", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {\n\t\tclose(blocked)\n\t\t_, err := io.ReadAll(r.Body)\n\t\tdone <- err\n\t}))\n\n\tln, _ := net.Listen(\"tcp\", \":0\")\n\tgo srv.httpServer.Serve(ln) //nolint:errcheck\n\n\t// Send a request with a body that never finishes.\n\tpr, _ := io.Pipe()\n\treq, _ := http.NewRequest(http.MethodPost,\n\t\t\"http://\"+ln.Addr().String(), pr)\n\tgo http.DefaultClient.Do(req) //nolint:errcheck\n\n\t<-blocked // wait until handler is inside Read\n\tctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)\n\tdefer cancel()\n\tif err := srv.Shutdown(ctx); err != nil {\n\t\tt.Fatalf(\"Shutdown: %v\", err)\n\t}\n\n\tselect {\n\tcase err := <-done:\n\t\tif err == nil {\n\t\t\tt.Fatal(\"expected Read to return an error after shutdown\")\n\t\t}\n\tcase <-time.After(3 * time.Second):\n\t\tt.Fatal(\"handler did not return after shutdown\")\n\t}\n}\n\nGOEOF"
+          }
+        }
+      ]
+    },
+    {
+      "step_id": 9,
+      "source": "agent",
+      "message": "Running tests.",
+      "tool_calls": [
+        {
+          "function_name": "bash",
+          "arguments": {
+            "command": "cd /repo && go test ./... -timeout 30s 2>&1"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "content": "=== RUN   TestBodyAbortedOnShutdown\n--- PASS: TestBodyAbortedOnShutdown (0.21s)\n=== RUN   TestBodyClose\n--- PASS: TestBodyClose (0.00s)\n=== RUN   TestServerShutdown\n--- PASS: TestServerShutdown (0.11s)\nPASS\nok  \tgithub.com/vapor-community/http-server/server\t0.334s\n"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 10,
+      "source": "agent",
+      "message": "Tests pass. The core change: `bodyReader.Read` now races the underlying read against a `abortCh` channel that `Server.Shutdown` closes before calling `httpServer.Shutdown`. This guarantees all body-reading goroutines are unblocked before shutdown completes."
+    }
+  ]
+}

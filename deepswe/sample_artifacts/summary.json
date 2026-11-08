@@ -1,0 +1,10 @@
+{
+  "name": "My Eval",
+  "generated_at": "2026-01-01T00:00:00Z",
+  "counts": {
+    "tasks": 3,
+    "repositories": 3,
+    "rollout_attempts": 48,
+    "trials": 48
+  }
+}

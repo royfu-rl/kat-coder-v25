@@ -1,0 +1,1136 @@
+{
+  "scope": "deep-swe",
+  "n_tasks": 113,
+  "rows": [
+    {
+      "id": "abort-pending-body-reads-on-shutdown",
+      "problem_title": "Abort pending body reads on shutdown",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/abort",
+      "repository_url": "https://github.com/deepswe/abort",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-iterable-collection-combinators-to-true-myth",
+      "problem_title": "Add iterable collection combinators to true-myth",
+      "display_description": "",
+      "language": "typescript",
+      "repository": "true-myth-ts/true-myth",
+      "repository_url": "https://github.com/true-myth-ts/true-myth",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-rolling-min-max-median-and-quantile-methods",
+      "problem_title": "Add rolling min, max, median, and quantile methods",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-typed-window-function-builders-with-over-clauses",
+      "problem_title": "Add typed window function builders with OVER clauses",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-a-per-origin-circuit-breaker-to-ofetch",
+      "problem_title": "Add a per-origin circuit breaker to ofetch",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-a-deterministic-cookiestore-with-modern-set-cookie-parsing",
+      "problem_title": "Add a deterministic CookieStore with modern Set-Cookie parsing",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-an-error-accumulating-validated-container",
+      "problem_title": "Add an error-accumulating Validated container",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "format-bigquery-pipe-syntax-queries-correctly",
+      "problem_title": "Format BigQuery pipe syntax queries correctly",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/format",
+      "repository_url": "https://github.com/deepswe/format",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-action-pinning-linting-for-actions-and-reusable-workflows",
+      "problem_title": "Add action pinning linting for actions and reusable workflows",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-typed-blend-range-access-and-blend-if-compositing",
+      "problem_title": "Add typed blend range access and blend-if compositing",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-retry-aware-publishing-audit-logs",
+      "problem_title": "Add retry-aware publishing audit logs",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-unified-manifest-stream-output-across-helm-commands",
+      "problem_title": "Add unified manifest stream output across Helm commands",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-multi-module-memory-snapshots-to-wazero",
+      "problem_title": "Add multi-module memory snapshots to wazero",
+      "display_description": "",
+      "language": "go",
+      "repository": "tetratelabs/wazero",
+      "repository_url": "https://github.com/tetratelabs/wazero",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-entity-snapshot-and-rollback-apis-to-koota",
+      "problem_title": "Add entity snapshot and rollback APIs to Koota",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-jsonpath-query-apis-to-orderedmap-and-starlark-modules",
+      "problem_title": "Add JSONPath query APIs to orderedmap and Starlark modules",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-multiplexed-ordered-streams-over-kcp",
+      "problem_title": "Add multiplexed ordered streams over KCP",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-duration-aware-sharding-to-vitest",
+      "problem_title": "Add duration-aware sharding to Vitest",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-deterministic-map-conflict-detection-to-y-map-writes",
+      "problem_title": "Add deterministic map conflict detection to Y.Map writes",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-matcheach-to-ts-pattern",
+      "problem_title": "Add `matchEach` to ts-pattern",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-task-graph-export-with-json-dot-and-text-output",
+      "problem_title": "Add task graph export with JSON, DOT, and text output",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "expose-accumulated-streamed-function-call-args-in-sdk-surfaces",
+      "problem_title": "Expose accumulated streamed function-call args in SDK surfaces",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/expose",
+      "repository_url": "https://github.com/deepswe/expose",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-stepped-slices-for-arrays-and-strings",
+      "problem_title": "Add stepped slices for arrays and strings",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-conditional-required-attributes-to-schemas",
+      "problem_title": "Add conditional required attributes to schemas",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-shapeindex-encoding-and-decoding",
+      "problem_title": "Add ShapeIndex encoding and decoding",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "harden-module-loading-cache-introspection-and-script-flags",
+      "problem_title": "Harden module loading, cache introspection, and script flags",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/harden",
+      "repository_url": "https://github.com/deepswe/harden",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "preserve-restored-query-state-in-persisted-snapshots",
+      "problem_title": "Preserve restored query state in persisted snapshots",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/preserve",
+      "repository_url": "https://github.com/deepswe/preserve",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-default-arguments-to-anko-function-parameters",
+      "problem_title": "Add default arguments to Anko function parameters",
+      "display_description": "",
+      "language": "typescript",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-drift-detection-and-compliance-baselines",
+      "problem_title": "Add drift detection and compliance baselines",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "partition-report-files-by-launcher-and-expand-report-templates",
+      "problem_title": "Partition report files by launcher and expand report templates",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/partition",
+      "repository_url": "https://github.com/deepswe/partition",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-recursive-schema-composition-to-valibot",
+      "problem_title": "Add recursive schema composition to Valibot",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-task-snapshots-inspection-and-diffing-to-aiomonitor",
+      "problem_title": "Add task snapshots, inspection, and diffing to aiomonitor",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-grouping-set-and-window-frame-sql-helpers",
+      "problem_title": "Add grouping-set and window-frame SQL helpers",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-multipart-response-parsing-to-httpx",
+      "problem_title": "Add multipart response parsing to HTTPX",
+      "display_description": "",
+      "language": "python",
+      "repository": "encode/httpx",
+      "repository_url": "https://github.com/encode/httpx",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "restore-richlog-follow-state-parity-and-expand-reflow-behavior",
+      "problem_title": "Restore RichLog follow-state parity and expand reflow behavior",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/restore",
+      "repository_url": "https://github.com/deepswe/restore",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-scoped-per-rule-ignore-markers-to-obsidian-linter",
+      "problem_title": "Add scoped per-rule ignore markers to Obsidian Linter",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-trap-coredump-generation-to-wasmi",
+      "problem_title": "Add trap coredump generation to wasmi",
+      "display_description": "",
+      "language": "go",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-lazy-recursive-schemas-with-dto-and-json-schema-export",
+      "problem_title": "Add lazy recursive schemas with DTO and JSON Schema export",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-input-key-aliases-to-name-mapping",
+      "problem_title": "Add input key aliases to name mapping",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-boundary-modes-to-stencil",
+      "problem_title": "Add boundary modes to `@stencil`",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-bounded-memory-spilling-to-scc-aggregation",
+      "problem_title": "Add bounded-memory spilling to SCC aggregation",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-partial-structuring-with-error-recovery-to-cattrs",
+      "problem_title": "Add partial structuring with error recovery to cattrs",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-go-embed-directive-support-for-interpreted-packages",
+      "problem_title": "Add go:embed directive support for interpreted packages",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-xml-diff-patch-and-merge-operations-to-etree",
+      "problem_title": "Add XML diff, patch, and merge operations to etree",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-worktree-merge-conflict-handling",
+      "problem_title": "Add worktree merge conflict handling",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-bidirectional-toml-table-converters",
+      "problem_title": "Add bidirectional TOML table converters",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-deterministic-multi-key-sorting-to-fd",
+      "problem_title": "Add deterministic multi-key sorting to fd",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "fix-isolated-go-side-calls-for-tengo-callables-and-closures",
+      "problem_title": "Fix isolated Go-side calls for Tengo callables and closures",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/fix",
+      "repository_url": "https://github.com/deepswe/fix",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-grouped-test-phases-with-synchronized-barriers",
+      "problem_title": "Add grouped test phases with synchronized barriers",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-session-bundle-recording-and-replay-to-ipython",
+      "problem_title": "Add session bundle recording and replay to IPython",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-rule-evaluation-profiling-to-rego",
+      "problem_title": "Add rule evaluation profiling to Rego",
+      "display_description": "",
+      "language": "lua",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "reconstruct-template-strings-in-partial-evaluation-output",
+      "problem_title": "Reconstruct template strings in partial evaluation output",
+      "display_description": "",
+      "language": "lua",
+      "repository": "deepswe/reconstruct",
+      "repository_url": "https://github.com/deepswe/reconstruct",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-method-declarations-and-interface-dispatch-to-scriggo",
+      "problem_title": "Add method declarations and interface dispatch to Scriggo",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-interprocedural-taint-checks-for-bandit-injection-sinks",
+      "problem_title": "Add interprocedural taint checks for Bandit injection sinks",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-durability-callbacks-and-wait-apis-for-sync-writes",
+      "problem_title": "Add durability callbacks and wait APIs for sync writes",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "validate-daemon-watch-status-and-log-lifecycle",
+      "problem_title": "Validate daemon watch, status, and log lifecycle",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/validate",
+      "repository_url": "https://github.com/deepswe/validate",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-duration-encoding-to-tablevectorizer",
+      "problem_title": "Add duration encoding to TableVectorizer",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "implement-recursive-agent-delegation-through-delegate-task-tool-calls",
+      "problem_title": "Implement recursive agent delegation through delegate_task tool calls",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/implement",
+      "repository_url": "https://github.com/deepswe/implement",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "persist-the-fitted-feature-schema-across-evaluate-predict-serve-and-export",
+      "problem_title": "Persist the fitted feature schema across evaluate, predict, serve, and export",
+      "display_description": "",
+      "language": "lua",
+      "repository": "deepswe/persist",
+      "repository_url": "https://github.com/deepswe/persist",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-incremental-cache-controls-to-bandit",
+      "problem_title": "Add incremental cache controls to Bandit",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-single-active-consumer-priority-and-cancel-tracking-to-virtual-transports",
+      "problem_title": "Add single-active-consumer priority and cancel tracking to virtual transports",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-safe-import-checkpoints-and-invariant-validation",
+      "problem_title": "Add safe import checkpoints and invariant validation",
+      "display_description": "",
+      "language": "typescript",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-destructuring-bindings-to-tengo",
+      "problem_title": "Add destructuring bindings to Tengo",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-a-checker-for-broken-doc-comment-links",
+      "problem_title": "Add a checker for broken doc comment links",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-implicit-head-and-automatic-options-responses-to-fastapi-routes",
+      "problem_title": "Add implicit HEAD and automatic OPTIONS responses to FastAPI routes",
+      "display_description": "",
+      "language": "python",
+      "repository": "tiangolo/fastapi",
+      "repository_url": "https://github.com/tiangolo/fastapi",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-flattened-dataclass-fields-to-mashumaro-field-options",
+      "problem_title": "Add flattened dataclass fields to Mashumaro field options",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "fix-promql-label-sorting-across-typed-and-untyped-values",
+      "problem_title": "Fix PromQL label sorting across typed and untyped values",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/fix",
+      "repository_url": "https://github.com/deepswe/fix",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-config-file-parsing-to-cliffy-commands",
+      "problem_title": "Add config file parsing to Cliffy commands",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-hierarchical-evaluation-cancellation-to-boa",
+      "problem_title": "Add hierarchical evaluation cancellation to Boa",
+      "display_description": "",
+      "language": "lua",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-html-document-format-handling-to-dasel",
+      "problem_title": "Add HTML document format handling to Dasel",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-deprecation-sunset-and-successor-headers-to-fastapi-routes",
+      "problem_title": "Add deprecation, sunset, and successor headers to FastAPI routes",
+      "display_description": "",
+      "language": "python",
+      "repository": "tiangolo/fastapi",
+      "repository_url": "https://github.com/tiangolo/fastapi",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-typed-variable-bindings-to-anko",
+      "problem_title": "Add typed variable bindings to Anko",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-streaming-json-iteration-to-httpx-responses",
+      "problem_title": "Add streaming JSON iteration to HTTPX responses",
+      "display_description": "",
+      "language": "python",
+      "repository": "encode/httpx",
+      "repository_url": "https://github.com/encode/httpx",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-json-schema-refs-and-dependency-keywords",
+      "problem_title": "Add JSON Schema refs and dependency keywords",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-rfc-5545-timezone-interoperability-to-dateutil-recurrence-parsing",
+      "problem_title": "Add RFC 5545 timezone interoperability to dateutil recurrence parsing",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-dependency-aware-async-initialization-to-the-container",
+      "problem_title": "Add dependency-aware async initialization to the container",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-consistent-hash-policy-support-to-trafficpolicy",
+      "problem_title": "Add consistent hash policy support to TrafficPolicy",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-request-coalescing-to-runnable",
+      "problem_title": "Add request coalescing to `Runnable`",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-error-stack-serialization-to-superjson",
+      "problem_title": "Add error stack serialization to SuperJSON",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "implement-a-deterministic-intersectionobserver-in-happy-dom",
+      "problem_title": "Implement a deterministic IntersectionObserver in Happy DOM",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/implement",
+      "repository_url": "https://github.com/deepswe/implement",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-a-persistent-analysis-cache-to-vulture",
+      "problem_title": "Add a persistent analysis cache to Vulture",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-tube-multiplexing-to-pwntools",
+      "problem_title": "Add tube multiplexing to pwntools",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-css-grid-layout-to-the-box-component",
+      "problem_title": "Add CSS Grid layout to the Box component",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-atomic-signal-selectors-to-kea",
+      "problem_title": "Add atomic signal selectors to Kea",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-composite-trait-aspects-to-koota",
+      "problem_title": "Add composite trait aspects to Koota",
+      "display_description": "",
+      "language": "typescript",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "complete-kitty-keyboard-phases-and-stable-fallback-key-metadata",
+      "problem_title": "Complete Kitty keyboard phases and stable fallback key metadata",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/complete",
+      "repository_url": "https://github.com/deepswe/complete",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-shorthand-expansion-and-compression-to-the-lexer",
+      "problem_title": "Add shorthand expansion and compression to the lexer",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-scoped-state-data-to-state-machine-callbacks-and-history",
+      "problem_title": "Add scoped state data to state machine callbacks and history",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-link-format-conversion-between-wiki-and-markdown-syntax",
+      "problem_title": "Add link format conversion between wiki and markdown syntax",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-transparent-encryption-to-dump-uploads",
+      "problem_title": "Add transparent encryption to dump uploads",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-async-autocomplete-options-and-fetch-lifecycle-handling",
+      "problem_title": "Add async autocomplete options and fetch lifecycle handling",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-conditional-option-dependencies-to-optique",
+      "problem_title": "Add conditional option dependencies to Optique",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-keyset-cursor-pagination-to-find",
+      "problem_title": "Add keyset cursor pagination to `$find`",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "reuse-one-toolbar-across-multiple-quill-editors",
+      "problem_title": "Reuse one toolbar across multiple Quill editors",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/reuse",
+      "repository_url": "https://github.com/deepswe/reuse",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-try-catch-error-recovery-to-expr",
+      "problem_title": "Add try/catch error recovery to expr",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-multicolumn-column-spans-to-array-like-environments",
+      "problem_title": "Add `\\multicolumn` column spans to array-like environments",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-explicit-resource-management-declarations-to-the-parser",
+      "problem_title": "Add explicit resource management declarations to the parser",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-build-time-grammar-conflict-analysis-to-participle",
+      "problem_title": "Add build-time grammar conflict analysis to participle",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-a-deferred-mutation-buffer-to-batch-entity-changes",
+      "problem_title": "Add a deferred mutation buffer to batch entity changes",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "format-create-table-ddl-and-add-ddl-parsing-helpers",
+      "problem_title": "Format CREATE TABLE DDL and add DDL parsing helpers",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/format",
+      "repository_url": "https://github.com/deepswe/format",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-transactional-reload-status-and-rollback-tracking-to-prometheus",
+      "problem_title": "Add transactional reload status and rollback tracking to Prometheus",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-dead-lettering-ttl-and-overflow-handling-to-virtual-queues",
+      "problem_title": "Add dead-lettering, TTL, and overflow handling to virtual queues",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-pair-level-relation-tracking-modifiers",
+      "problem_title": "Add pair-level relation tracking modifiers",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-value-based-query-predicates-to-koota",
+      "problem_title": "Add value-based query predicates to Koota",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "preserve-ansi-resets-during-truncation-and-styling",
+      "problem_title": "Preserve ANSI resets during truncation and styling",
+      "display_description": "",
+      "language": "typescript",
+      "repository": "deepswe/preserve",
+      "repository_url": "https://github.com/deepswe/preserve",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-configurable-array-merge-strategies-to-helm-value-coalescing",
+      "problem_title": "Add configurable array merge strategies to Helm value coalescing",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-bail-on-test-failure-handling-to-testem",
+      "problem_title": "Add bail-on-test-failure handling to Testem",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-sse-streaming-endpoints-to-httpapi",
+      "problem_title": "Add SSE streaming endpoints to HttpApi",
+      "display_description": "",
+      "language": "typescript",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "coalesce-qualifying-choices-into-character-classes",
+      "problem_title": "Coalesce qualifying choices into character classes",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/coalesce",
+      "repository_url": "https://github.com/deepswe/coalesce",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "preserve-structure-needed-by-stylesheet-selectors",
+      "problem_title": "Preserve structure needed by stylesheet selectors",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/preserve",
+      "repository_url": "https://github.com/deepswe/preserve",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-policy-based-alerting-for-failures-latency-and-ssl-expiry",
+      "problem_title": "Add policy-based alerting for failures, latency, and SSL expiry",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-structured-nosec-directives-for-regions-and-next-line",
+      "problem_title": "Add structured nosec directives for regions and next line",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-graphql-incremental-delivery-with-defer-and-stream",
+      "problem_title": "Add GraphQL incremental delivery with @defer and @stream",
+      "display_description": "",
+      "language": "python",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    },
+    {
+      "id": "add-automatic-table-of-contents-generation-for-obsidian-linter",
+      "problem_title": "Add automatic table of contents generation for Obsidian linter",
+      "display_description": "",
+      "language": "typescript",
+      "repository": "deepswe/add",
+      "repository_url": "https://github.com/deepswe/add",
+      "base_commit_hash": "",
+      "prompt_characters": 0
+    }
+  ]
+}

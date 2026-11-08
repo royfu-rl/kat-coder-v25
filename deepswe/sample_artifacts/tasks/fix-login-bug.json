@@ -1,0 +1,18 @@
+{
+  "task_id": "fix-login-bug",
+  "n_files": 2,
+  "files": [
+    {
+      "path": "instruction.md",
+      "language": "markdown",
+      "size": 0,
+      "content": "# Fix the broken login redirect\n\nAfter OAuth, users land on `/` instead of their original page.\n\n- Preserve the `next` param through the redirect.\n- Add a test."
+    },
+    {
+      "path": "task.toml",
+      "language": "toml",
+      "size": 0,
+      "content": "[task]\nid = \"fix-login-bug\"\ntimeout_min = 90\n"
+    }
+  ]
+}

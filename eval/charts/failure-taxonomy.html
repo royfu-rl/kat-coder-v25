@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stacked bar + tabs</title>
+<style>
+  :root{
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,"PingFang SC","Microsoft YaHei",sans-serif;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+    --ink:#1a1a1a;--muted:#9a9aa0;--muted2:#b8b8be;--hairline:#ececec;--border:#e6e6e6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#f4f4f5;font-family:var(--font);color:var(--ink);
+    -webkit-font-smoothing:antialiased;padding:40px 20px;display:flex;justify-content:center;}
+  .card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:32px 36px 28px;
+    width:100%;max-width:920px;box-shadow:0 1px 2px rgba(0,0,0,.04),0 8px 28px rgba(0,0,0,.05);}
+  .card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:22px;}
+  .title{font-size:22px;font-weight:650;letter-spacing:-.01em;margin:0;}
+  .tabs{display:inline-flex;border:1px solid var(--border);border-radius:9px;padding:3px;background:#fafafa;flex:none;}
+  .tab{appearance:none;border:none;background:transparent;font-family:var(--font);font-size:14px;font-weight:550;
+    color:var(--muted2);padding:7px 16px;border-radius:7px;cursor:pointer;transition:all .18s ease;}
+  .tab:hover{color:#6a6a70;}
+  .tab.active{background:#111;color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.18);}
+  .tab.active.ring{box-shadow:0 0 0 2px #3171c8,0 1px 3px rgba(0,0,0,.18);}
+  .row{display:grid;grid-template-columns:150px 1fr 52px;align-items:center;column-gap:14px;padding:5px 0;}
+  .row-label{font-size:14.5px;text-align:right;color:#2a2a2a;white-space:nowrap;}
+  .bar{display:flex;height:30px;border-radius:3px;overflow:hidden;background:#f5f5f5;}
+  .seg{height:100%;transition:width .55s cubic-bezier(.4,0,.2,1),opacity .2s ease;cursor:pointer;min-width:0;}
+  .seg.dim{opacity:.18;} .seg.hot{box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.35);}
+  .row-n{font-size:13px;color:var(--muted2);font-variant-numeric:tabular-nums;}
+  .legend{margin-top:26px;border-top:1px solid var(--hairline);padding-top:18px;}
+  .leg-group{display:grid;grid-template-columns:150px 1fr;align-items:start;gap:6px 14px;padding:7px 0;}
+  .leg-group+.leg-group{border-top:1px solid #f6f6f6;}
+  .leg-grouptitle{font-size:11px;letter-spacing:.12em;color:var(--muted2);text-transform:uppercase;padding-top:4px;}
+  .leg-items{display:flex;flex-wrap:wrap;gap:8px 18px;}
+  .leg{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-family:var(--mono);color:#3a3a3a;
+    cursor:pointer;padding:4px 8px;border-radius:6px;border:1px solid transparent;transition:background .15s,border-color .15s;user-select:none;}
+  .leg:hover{background:#f6f6f7;} .leg.sel{border-color:#cfcfd4;background:#f1f1f3;} .leg.faded{opacity:.35;}
+  .swatch{width:13px;height:13px;border-radius:3px;flex:none;}
+  #tip{position:fixed;z-index:50;pointer-events:none;background:#111;color:#fff;border-radius:8px;
+    padding:8px 11px;font-size:12.5px;line-height:1.45;box-shadow:0 6px 20px rgba(0,0,0,.25);
+    opacity:0;transform:translateY(4px);transition:opacity .12s;white-space:nowrap;}
+  #tip .t-cat{font-family:var(--mono);font-weight:600;} #tip .t-sub{color:#c8c8cc;} #tip b{color:#fff;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="card-head">
+    <h2 class="title" id="title"></h2>
+    <div class="tabs" id="tabs"></div>
+  </div>
+  <div id="rows"></div>
+  <div class="legend" id="legend"></div>
+</div>
+<div id="tip"></div>
+
+<script>
+/* ╔══════════════════════════════════════════════════════════════╗
+   ║  DATA — edit this block only. Everything below renders it.     ║
+   ╚══════════════════════════════════════════════════════════════╝
+   - CATS:  category key → {color, group}. Stacking order = array order.
+   - GROUPS: legend section order.
+   - TABS:  one or more views. Single tab? Keep one entry; the tab strip
+            auto-hides when there is only one. `ringActive` reproduces the
+            blue outline on a selected tab (set per-tab, optional).
+   - Each tab: order[] = rows top→bottom; n{} = trial counts;
+            dist{} = per-row {category: rawCount}. Values are normalized
+            to 100% automatically, so raw counts or percentages both work. */
+const TITLE = "Failure-mode taxonomy by model";
+
+const CATS = [
+  {k:"PASS_LEGITIMATE",             c:"#a7c4a0", g:"TRUE POSITIVE"},   // 原版 LEGITIMATE 灰绿
+
+  // TN — 每个 tag 一个独立柔和色相，直接取自原模板调色板
+  {k:"LOCALIZATION_WRONG_FILE",     c:"#3a9ec4", g:"TRUE NEGATIVE"},   // 原 WRONG_FILE 青
+  {k:"LOCALIZATION_WRONG_FUNCTION", c:"#9c7a48", g:"TRUE NEGATIVE"},   // 原 KNOWLEDGE_GAP 棕
+  {k:"TASK_MISINTERPRETED",         c:"#8a93d6", g:"TRUE NEGATIVE"},   // 原 API_FAILURE 淡蓝紫
+  {k:"PATCH_PARTIAL_REQUIREMENT",   c:"#3171c8", g:"TRUE NEGATIVE"},   // 原 MISSED_REQUIREMENT 蓝
+  {k:"PATCH_MISSING_BRANCH",        c:"#a9a042", g:"TRUE NEGATIVE"},   // 原 INTEGRATION_ERROR 橄榄
+  {k:"PATCH_LOGIC_ERROR",           c:"#2f8f8a", g:"TRUE NEGATIVE"},   // 原 WRONG_LOGIC 青绿
+  {k:"APPLY_MALFORMED_PATCH",       c:"#c9b97a", g:"TRUE NEGATIVE"},   // 原 SYNTAX_ERROR 浅褐
+  {k:"RUNTIME_UNRESOLVED_REFERENCE",c:"#6a5cc0", g:"TRUE NEGATIVE"},   // 原 REGRESSION 紫
+  {k:"RUNTIME_STALE_CALLSITE",      c:"#2f9e7a", g:"TRUE NEGATIVE"},   // 原 MISUNDERSTOOD_TASK 绿松
+  {k:"F2P_UNCOVERED",               c:"#7b3fc0", g:"TRUE NEGATIVE"},   // 原 UNVERIFIED_ASSUMPTION 深紫
+  {k:"F2P_NO_PATCH_EMITTED",        c:"#8a9098", g:"TRUE NEGATIVE"},   // 原 TRIAL_INCOMPLETE 灰
+  {k:"F2P_TESTS_NOT_RUN",           c:"#b48ade", g:"TRUE NEGATIVE"},   // 淡紫
+  {k:"P2P_SIGNATURE_BREAK",         c:"#4f8fd6", g:"TRUE NEGATIVE"},   // 中蓝
+  {k:"P2P_IMPORT_TIME_BREAK",       c:"#5fb0c9", g:"TRUE NEGATIVE"},   // 浅青
+  {k:"TRAJECTORY_INCOMPLETE",       c:"#b0b4bc", g:"TRUE NEGATIVE"},   // 浅灰
+
+  {k:"TEST_MISMATCH",               c:"#d98b85", g:"FALSE NEGATIVE"},  // 原 TEST_MISMATCH 珊瑚
+  {k:"TEST_BROKEN",                 c:"#e08a3c", g:"FALSE NEGATIVE"},  // 原 TEST_BROKEN 橙
+  {k:"AMBIGUOUS_TASK",              c:"#cdb863", g:"FALSE NEGATIVE"},  // 原 AMBIGUOUS_TASK 芥黄
+  {k:"EXECUTION_EXTERNAL",          c:"#c98f96", g:"FALSE NEGATIVE"},  // 原 EXECUTION_ERROR_EXTERNAL 灰粉
+
+  {k:"PASS_CHEATED",                c:"#8a3fc4", g:"FALSE POSITIVE"},  // 原 CHEATED 紫
+
+  {k:"UNCLEAR",                     c:"#c8c8ce", g:"UNCLEAR"},
+];
+const GROUPS = ["TRUE POSITIVE","TRUE NEGATIVE","FALSE NEGATIVE","FALSE POSITIVE","UNCLEAR"];
+
+// Values are percentages; n=100 so tooltip counts read as %.
+const TABS = [
+  {
+    id:"taxonomy", label:"Taxonomy", ringActive:true,
+    order:["Claude 4.8","GLM-5.2","Kimi K2.6","GLM-5.1","Pro-v1.3","Pro-v1.1","Pro-base"],
+    n:{"Claude 4.8":100,"GLM-5.2":100,"Kimi K2.6":100,"GLM-5.1":100,"Pro-v1.3":100,"Pro-v1.1":100,"Pro-base":100},
+    dist:{
+      "Claude 4.8":{PASS_LEGITIMATE:58,TASK_MISINTERPRETED:1,PATCH_PARTIAL_REQUIREMENT:6,PATCH_MISSING_BRANCH:7,PATCH_LOGIC_ERROR:6,RUNTIME_UNRESOLVED_REFERENCE:2,RUNTIME_STALE_CALLSITE:1,F2P_UNCOVERED:3,F2P_TESTS_NOT_RUN:1,TRAJECTORY_INCOMPLETE:2,TEST_MISMATCH:2,AMBIGUOUS_TASK:3,PASS_CHEATED:8},
+      "GLM-5.2":{PASS_LEGITIMATE:47,LOCALIZATION_WRONG_FILE:1,TASK_MISINTERPRETED:1,PATCH_PARTIAL_REQUIREMENT:8,PATCH_MISSING_BRANCH:10,PATCH_LOGIC_ERROR:8,RUNTIME_UNRESOLVED_REFERENCE:3,RUNTIME_STALE_CALLSITE:1,F2P_UNCOVERED:3,F2P_TESTS_NOT_RUN:2,TRAJECTORY_INCOMPLETE:2,TEST_MISMATCH:1,PASS_CHEATED:13},
+      "Kimi K2.6":{PASS_LEGITIMATE:43,LOCALIZATION_WRONG_FILE:1,TASK_MISINTERPRETED:1,PATCH_PARTIAL_REQUIREMENT:11,PATCH_MISSING_BRANCH:15,PATCH_LOGIC_ERROR:12,RUNTIME_UNRESOLVED_REFERENCE:6,RUNTIME_STALE_CALLSITE:2,F2P_UNCOVERED:4,F2P_TESTS_NOT_RUN:2,TRAJECTORY_INCOMPLETE:2,PASS_CHEATED:1},
+      "GLM-5.1":{PASS_LEGITIMATE:42,LOCALIZATION_WRONG_FILE:1,TASK_MISINTERPRETED:1,PATCH_PARTIAL_REQUIREMENT:11,PATCH_MISSING_BRANCH:15,PATCH_LOGIC_ERROR:13,RUNTIME_UNRESOLVED_REFERENCE:5,RUNTIME_STALE_CALLSITE:1,F2P_UNCOVERED:4,F2P_TESTS_NOT_RUN:2,TRAJECTORY_INCOMPLETE:2,TEST_MISMATCH:1,PASS_CHEATED:2},
+      "Pro-v1.3":{PASS_LEGITIMATE:34,LOCALIZATION_WRONG_FILE:1,LOCALIZATION_WRONG_FUNCTION:1,PATCH_PARTIAL_REQUIREMENT:13,PATCH_MISSING_BRANCH:24,PATCH_LOGIC_ERROR:19,RUNTIME_UNRESOLVED_REFERENCE:3,F2P_UNCOVERED:1,TRAJECTORY_INCOMPLETE:2,TEST_MISMATCH:1,AMBIGUOUS_TASK:1},
+      "Pro-v1.1":{PASS_LEGITIMATE:28,LOCALIZATION_WRONG_FILE:1,LOCALIZATION_WRONG_FUNCTION:1,TASK_MISINTERPRETED:1,PATCH_PARTIAL_REQUIREMENT:14,PATCH_MISSING_BRANCH:23,PATCH_LOGIC_ERROR:19,RUNTIME_UNRESOLVED_REFERENCE:4,P2P_SIGNATURE_BREAK:6,TRAJECTORY_INCOMPLETE:1,TEST_MISMATCH:1,EXECUTION_EXTERNAL:1},
+      "Pro-base":{PASS_LEGITIMATE:22,LOCALIZATION_WRONG_FILE:1,LOCALIZATION_WRONG_FUNCTION:1,TASK_MISINTERPRETED:1,PATCH_PARTIAL_REQUIREMENT:15,PATCH_MISSING_BRANCH:25,PATCH_LOGIC_ERROR:23,APPLY_MALFORMED_PATCH:1,RUNTIME_UNRESOLVED_REFERENCE:2,RUNTIME_STALE_CALLSITE:1,F2P_UNCOVERED:1,F2P_NO_PATCH_EMITTED:1,P2P_IMPORT_TIME_BREAK:1,TRAJECTORY_INCOMPLETE:1,TEST_MISMATCH:3,EXECUTION_EXTERNAL:1},
+    }
+  },
+];
+/* ────────────────────────── end DATA ────────────────────────── */
+
+const COLOR=Object.fromEntries(CATS.map(c=>[c.k,c.c]));
+const tip=document.getElementById("tip");
+let activeCat=null,currentTab=TABS[0].id;
+
+function showTip(html,e){tip.innerHTML=html;tip.style.opacity=1;moveTip(e);}
+function moveTip(e){const pad=14;let x=e.clientX+pad,y=e.clientY+pad;const r=tip.getBoundingClientRect();
+  if(x+r.width>innerWidth)x=e.clientX-r.width-pad;if(y+r.height>innerHeight)y=e.clientY-r.height-pad;
+  tip.style.left=x+"px";tip.style.top=y+"px";}
+function hideTip(){tip.style.opacity=0;}
+function normalize(d){const s=Object.values(d).reduce((a,b)=>a+b,0)||1;
+  return Object.fromEntries(Object.entries(d).map(([k,v])=>[k,v/s*100]));}
+
+function renderTabs(){
+  const el=document.getElementById("tabs");
+  if(TABS.length<2){el.style.display="none";return;}
+  el.innerHTML=TABS.map(t=>`<button class="tab" data-tab="${t.id}">${t.label}</button>`).join("");
+  el.querySelectorAll(".tab").forEach(btn=>btn.addEventListener("click",()=>{currentTab=btn.dataset.tab;syncTabs();renderBars();}));
+  syncTabs();
+}
+function syncTabs(){
+  document.querySelectorAll(".tab").forEach(t=>{
+    const tab=TABS.find(x=>x.id===t.dataset.tab),on=t.dataset.tab===currentTab;
+    t.classList.toggle("active",on);
+    t.classList.toggle("ring",on&&!!tab.ringActive);
+  });
+}
+function renderBars(){
+  const tab=TABS.find(t=>t.id===currentTab);
+  const rows=document.getElementById("rows");rows.innerHTML="";
+  tab.order.forEach(row=>{
+    const dist=normalize(tab.dist[row]),n=tab.n[row];
+    let seg="";
+    CATS.forEach(cat=>{const pct=dist[cat.k];if(!pct)return;
+      const count=Math.round(pct/100*n);
+      seg+=`<div class="seg" data-cat="${cat.k}" data-pct="${pct.toFixed(1)}" data-count="${count}" style="width:${pct}%;background:${cat.c}"></div>`;});
+    const div=document.createElement("div");div.className="row";
+    div.innerHTML=`<div class="row-label">${row}</div><div class="bar">${seg}</div><div class="row-n">n=${n}</div>`;
+    rows.appendChild(div);
+  });
+  document.querySelectorAll(".seg").forEach(s=>{
+    s.addEventListener("mousemove",e=>showTip(`<div class="t-cat" style="color:${COLOR[s.dataset.cat]}">${s.dataset.cat}</div><div class="t-sub"><b>${s.dataset.count}</b> · <b>${s.dataset.pct}%</b></div>`,e));
+    s.addEventListener("mouseleave",hideTip);
+  });
+  applyHighlight();
+}
+function renderLegend(){
+  const legend=document.getElementById("legend");legend.innerHTML="";
+  GROUPS.forEach(g=>{const items=CATS.filter(c=>c.g===g);if(!items.length)return;
+    const wrap=document.createElement("div");wrap.className="leg-group";
+    wrap.innerHTML=`<div class="leg-grouptitle">${g}</div><div class="leg-items">`+
+      items.map(c=>`<span class="leg" data-cat="${c.k}"><span class="swatch" style="background:${c.c}"></span>${c.k}</span>`).join("")+`</div>`;
+    legend.appendChild(wrap);});
+  document.querySelectorAll(".leg").forEach(leg=>leg.addEventListener("click",()=>{
+    activeCat=(activeCat===leg.dataset.cat)?null:leg.dataset.cat;applyHighlight();}));
+}
+function applyHighlight(){
+  document.querySelectorAll(".seg").forEach(s=>{
+    s.classList.toggle("dim",activeCat&&s.dataset.cat!==activeCat);
+    s.classList.toggle("hot",activeCat&&s.dataset.cat===activeCat);});
+  document.querySelectorAll(".leg").forEach(l=>{
+    l.classList.toggle("sel",activeCat&&l.dataset.cat===activeCat);
+    l.classList.toggle("faded",activeCat&&l.dataset.cat!==activeCat);});
+}
+document.getElementById("title").textContent=TITLE;
+renderTabs();renderLegend();renderBars();
+addEventListener("scroll",hideTip,true);
+</script>
+</body>
+</html>
+
